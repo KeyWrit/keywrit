@@ -16,8 +16,8 @@ export type {
   PublicKeyInput,
   ClaimMatchers,
   TimingOptions,
+  RevocationList,
   ValidatorConfig,
-  ValidatorConfigWithUrl,
 } from "./config.ts";
 
 // Validation types

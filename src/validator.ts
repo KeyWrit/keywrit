@@ -4,12 +4,13 @@
 
 import type {
   ValidatorConfig,
-  ValidatorConfigWithUrl,
+  RevocationList,
   ValidationResult,
   LicensePayload,
   FlagCheckResult,
   ExpirationInfo,
   ValidationWarning,
+  PublicKeyInput,
 } from "./types/index.ts";
 import { decodeJWT, decodePayload } from "./jwt/decode.ts";
 import { verifySignature } from "./jwt/verify.ts";
@@ -23,32 +24,48 @@ import { malformedToken, invalidHeader, invalidPayload } from "./errors.ts";
  */
 export class LicenseValidator<T = Record<string, unknown>> {
   private readonly publicKey: Uint8Array;
-  private readonly config: ValidatorConfig;
+  private readonly revocationUrl?: string;
+  private readonly revocation?: RevocationList;
+  private readonly claims?: ValidatorConfig["claims"];
+  private readonly timing?: ValidatorConfig["timing"];
+  private readonly allowNoExpiration?: boolean;
 
-  public constructor(config: ValidatorConfig) {
-    this.publicKey = normalizePublicKey(config.publicKey);
-    this.config = config;
+  private constructor(
+    publicKey: Uint8Array,
+    config: ValidatorConfig
+  ) {
+    this.publicKey = publicKey;
+    this.revocationUrl = "revocationUrl" in config ? config.revocationUrl : undefined;
+    this.revocation = "revocation" in config ? config.revocation : undefined;
+    this.claims = config.claims;
+    this.timing = config.timing;
+    this.allowNoExpiration = config.allowNoExpiration;
   }
 
   /**
-   * Create a validator by fetching the public key from a URL
+   * Create a validator from configuration
    */
   public static async create<T = Record<string, unknown>>(
-    config: ValidatorConfigWithUrl
+    config: ValidatorConfig
   ): Promise<LicenseValidator<T>> {
-    const response = await fetch(config.publicKeyUrl);
-    if (!response.ok) {
-      throw new Error(
-        `Failed to fetch public key from ${config.publicKeyUrl}: ${response.status} ${response.statusText}`
-      );
+    let publicKey: Uint8Array;
+
+    if ("publicKey" in config && config.publicKey) {
+      publicKey = normalizePublicKey(config.publicKey);
+    } else if ("publicKeyUrl" in config && config.publicKeyUrl) {
+      const response = await fetch(config.publicKeyUrl);
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch public key from ${config.publicKeyUrl}: ${response.status} ${response.statusText}`
+        );
+      }
+      const keyText = (await response.text()).trim();
+      publicKey = normalizePublicKey(keyText);
+    } else {
+      throw new Error("Either publicKey or publicKeyUrl must be provided");
     }
 
-    const publicKey = (await response.text()).trim();
-
-    return new LicenseValidator<T>({
-      ...config,
-      publicKey,
-    });
+    return new LicenseValidator<T>(publicKey, config);
   }
 
   /**
@@ -102,6 +119,16 @@ export class LicenseValidator<T = Record<string, unknown>> {
       };
     }
 
+    // Check revocation
+    const revocationResult = await this.checkRevocation(decoded.payload);
+    if (revocationResult) {
+      return {
+        valid: false,
+        error: revocationResult,
+        unverifiedPayload: decoded.payload as LicensePayload,
+      };
+    }
+
     // Collect all errors and warnings
     const allErrors: typeof verifyResult.error[] = [];
     const allWarnings: ValidationWarning[] = [];
@@ -109,17 +136,17 @@ export class LicenseValidator<T = Record<string, unknown>> {
     // Validate timing claims
     const timingResult = validateTimingClaims(
       decoded.payload,
-      this.config.timing,
-      this.config.allowNoExpiration
+      this.timing,
+      this.allowNoExpiration
     );
     allErrors.push(...timingResult.errors);
     allWarnings.push(...timingResult.warnings);
 
     // Validate claim matchers
-    if (this.config.claims) {
+    if (this.claims) {
       const claimResult = validateClaimMatchers(
         decoded.payload,
-        this.config.claims
+        this.claims
       );
       allErrors.push(...claimResult.errors);
       allWarnings.push(...claimResult.warnings);
@@ -271,25 +298,6 @@ export class LicenseValidator<T = Record<string, unknown>> {
   }
 
   /**
-   * Create a new validator with extended configuration
-   */
-  public extend(config: Partial<ValidatorConfig>): LicenseValidator<T> {
-    return new LicenseValidator({
-      ...this.config,
-      ...config,
-      publicKey: config.publicKey
-        ? config.publicKey
-        : this.config.publicKey,
-      claims: config.claims
-        ? { ...this.config.claims, ...config.claims }
-        : this.config.claims,
-      timing: config.timing
-        ? { ...this.config.timing, ...config.timing }
-        : this.config.timing,
-    });
-  }
-
-  /**
    * Get expiration information from a token (without full validation)
    */
   public getExpirationInfo(token: string): ExpirationInfo | null {
@@ -298,7 +306,7 @@ export class LicenseValidator<T = Record<string, unknown>> {
       return null;
     }
 
-    const currentTime = this.config.timing?.currentTime ?? now();
+    const currentTime = this.timing?.currentTime ?? now();
     const exp = payload.exp;
 
     if (exp === undefined) {
@@ -319,5 +327,64 @@ export class LicenseValidator<T = Record<string, unknown>> {
       secondsRemaining,
       timeRemaining: formatDuration(Math.abs(secondsRemaining)),
     };
+  }
+
+  /**
+   * Check if a token is revoked
+   */
+  private async checkRevocation(
+    payload: LicensePayload
+  ): Promise<{ code: "TOKEN_REVOKED"; message: string; details?: Record<string, unknown> } | null> {
+    // Get revocation list from static config or URL
+    let revocationList: RevocationList | null = null;
+
+    if (this.revocationUrl) {
+      revocationList = await this.fetchRevocationList();
+    } else if (this.revocation) {
+      revocationList = this.revocation;
+    }
+
+    if (!revocationList) {
+      return null;
+    }
+
+    // Check if jti is revoked
+    if (payload.jti && revocationList.jti?.includes(payload.jti)) {
+      return {
+        code: "TOKEN_REVOKED",
+        message: `Token has been revoked (jti: ${payload.jti})`,
+        details: { jti: payload.jti, reason: "jti_revoked" },
+      };
+    }
+
+    // Check if sub is revoked
+    if (payload.sub && revocationList.sub?.includes(payload.sub)) {
+      return {
+        code: "TOKEN_REVOKED",
+        message: `Subject has been revoked (sub: ${payload.sub})`,
+        details: { sub: payload.sub, reason: "sub_revoked" },
+      };
+    }
+
+    return null;
+  }
+
+  /**
+   * Fetch revocation list from URL
+   */
+  private async fetchRevocationList(): Promise<RevocationList | null> {
+    if (!this.revocationUrl) {
+      return null;
+    }
+
+    try {
+      const response = await fetch(this.revocationUrl);
+      if (!response.ok) {
+        return null;
+      }
+      return await response.json();
+    } catch {
+      return null;
+    }
   }
 }

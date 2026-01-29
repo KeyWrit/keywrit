@@ -29,6 +29,14 @@ export interface TimingOptions {
   currentTime?: number;
 }
 
+/** Revocation list for invalidating tokens */
+export interface RevocationList {
+  /** Revoked JWT IDs (jti claim) */
+  jti?: string[];
+  /** Revoked subjects (sub claim) - all tokens for these subjects are invalid */
+  sub?: string[];
+}
+
 /** Base validator configuration options */
 export interface ValidatorConfigBase {
   /** Claim matchers for validation */
@@ -39,14 +47,15 @@ export interface ValidatorConfigBase {
   allowNoExpiration?: boolean;
 }
 
-/** Validator configuration with direct public key */
-export interface ValidatorConfig extends ValidatorConfigBase {
-  /** Ed25519 public key for signature verification */
-  publicKey: PublicKeyInput;
-}
+/** Public key source - either direct key or URL */
+export type PublicKeySource =
+  | { publicKey: PublicKeyInput; publicKeyUrl?: never }
+  | { publicKey?: never; publicKeyUrl: string };
 
-/** Validator configuration with public key URL */
-export interface ValidatorConfigWithUrl extends ValidatorConfigBase {
-  /** URL to fetch the Ed25519 public key from */
-  publicKeyUrl: string;
-}
+/** Revocation source - either static list or URL (both optional) */
+export type RevocationSource =
+  | { revocation?: RevocationList; revocationUrl?: never }
+  | { revocation?: never; revocationUrl?: string };
+
+/** Validator configuration */
+export type ValidatorConfig = ValidatorConfigBase & PublicKeySource & RevocationSource;

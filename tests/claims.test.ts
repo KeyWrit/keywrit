@@ -15,7 +15,7 @@ describe("claim matchers", () => {
         exp: futureTimestamp(3600),
       });
 
-      const validator = new LicenseValidator({
+      const validator = await LicenseValidator.create({
         publicKey: publicKeyHex,
         claims: { iss: "mycompany" },
       });
@@ -31,7 +31,7 @@ describe("claim matchers", () => {
         exp: futureTimestamp(3600),
       });
 
-      const validator = new LicenseValidator({
+      const validator = await LicenseValidator.create({
         publicKey: publicKeyHex,
         claims: { iss: "mycompany" },
       });
@@ -50,7 +50,7 @@ describe("claim matchers", () => {
         exp: futureTimestamp(3600),
       });
 
-      const validator = new LicenseValidator({
+      const validator = await LicenseValidator.create({
         publicKey: publicKeyHex,
         claims: { iss: "mycompany" },
       });
@@ -70,7 +70,7 @@ describe("claim matchers", () => {
         exp: futureTimestamp(3600),
       });
 
-      const validator = new LicenseValidator({
+      const validator = await LicenseValidator.create({
         publicKey: publicKeyHex,
         claims: { sub: "user@example.com" },
       });
@@ -85,7 +85,7 @@ describe("claim matchers", () => {
         exp: futureTimestamp(3600),
       });
 
-      const validator = new LicenseValidator({
+      const validator = await LicenseValidator.create({
         publicKey: publicKeyHex,
         claims: { sub: "user@example.com" },
       });
@@ -107,7 +107,7 @@ describe("claim matchers", () => {
         exp: futureTimestamp(3600),
       });
 
-      const validator = new LicenseValidator({
+      const validator = await LicenseValidator.create({
         publicKey: publicKeyHex,
         claims: { aud: "myapp" },
       });
@@ -123,7 +123,7 @@ describe("claim matchers", () => {
         exp: futureTimestamp(3600),
       });
 
-      const validator = new LicenseValidator({
+      const validator = await LicenseValidator.create({
         publicKey: publicKeyHex,
         claims: { aud: "app2" },
       });
@@ -139,7 +139,7 @@ describe("claim matchers", () => {
         exp: futureTimestamp(3600),
       });
 
-      const validator = new LicenseValidator({
+      const validator = await LicenseValidator.create({
         publicKey: publicKeyHex,
         claims: { aud: ["myapp", "otherapp"] },
       });
@@ -155,7 +155,7 @@ describe("claim matchers", () => {
         exp: futureTimestamp(3600),
       });
 
-      const validator = new LicenseValidator({
+      const validator = await LicenseValidator.create({
         publicKey: publicKeyHex,
         claims: { aud: "myapp" },
       });
@@ -177,7 +177,7 @@ describe("claim matchers", () => {
         exp: futureTimestamp(3600),
       });
 
-      const validator = new LicenseValidator({
+      const validator = await LicenseValidator.create({
         publicKey: publicKeyHex,
         claims: { requiredFlags: ["export", "api"] },
       });
@@ -193,7 +193,7 @@ describe("claim matchers", () => {
         exp: futureTimestamp(3600),
       });
 
-      const validator = new LicenseValidator({
+      const validator = await LicenseValidator.create({
         publicKey: publicKeyHex,
         claims: { requiredFlags: ["export", "api"] },
       });
@@ -212,7 +212,7 @@ describe("claim matchers", () => {
         exp: futureTimestamp(3600),
       });
 
-      const validator = new LicenseValidator({
+      const validator = await LicenseValidator.create({
         publicKey: publicKeyHex,
         claims: { requiredFlags: ["export"] },
       });
@@ -233,7 +233,7 @@ describe("claim matchers", () => {
         exp: futureTimestamp(3600),
       });
 
-      const validator = new LicenseValidator({
+      const validator = await LicenseValidator.create({
         publicKey: publicKeyHex,
         claims: { requiredKind: "pro" },
       });
@@ -249,7 +249,7 @@ describe("claim matchers", () => {
         exp: futureTimestamp(3600),
       });
 
-      const validator = new LicenseValidator({
+      const validator = await LicenseValidator.create({
         publicKey: publicKeyHex,
         claims: { requiredKind: "pro" },
       });
@@ -269,7 +269,7 @@ describe("claim matchers", () => {
         exp: futureTimestamp(3600),
       });
 
-      const validator = new LicenseValidator({
+      const validator = await LicenseValidator.create({
         publicKey: publicKeyHex,
         claims: { requiredKind: "pro" },
       });
@@ -290,7 +290,7 @@ describe("claim matchers", () => {
         exp: futureTimestamp(3600),
       });
 
-      const validator = new LicenseValidator({
+      const validator = await LicenseValidator.create({
         publicKey: publicKeyHex,
         claims: { requiredFeatures: ["maxUsers", "region"] },
       });
@@ -306,7 +306,7 @@ describe("claim matchers", () => {
         exp: futureTimestamp(3600),
       });
 
-      const validator = new LicenseValidator({
+      const validator = await LicenseValidator.create({
         publicKey: publicKeyHex,
         claims: { requiredFeatures: ["maxUsers", "region"] },
       });
@@ -325,7 +325,7 @@ describe("claim matchers", () => {
         exp: futureTimestamp(3600),
       });
 
-      const validator = new LicenseValidator({
+      const validator = await LicenseValidator.create({
         publicKey: publicKeyHex,
         claims: { requiredFeatures: ["maxUsers"] },
       });

@@ -15,7 +15,7 @@ describe("flag checking", () => {
         exp: futureTimestamp(3600),
       });
 
-      const validator = new LicenseValidator({ publicKey: publicKeyHex });
+      const validator = await LicenseValidator.create({ publicKey: publicKeyHex });
       const result = await validator.hasFlag(token, "export");
 
       expect(result.enabled).toBe(true);
@@ -29,7 +29,7 @@ describe("flag checking", () => {
         exp: futureTimestamp(3600),
       });
 
-      const validator = new LicenseValidator({ publicKey: publicKeyHex });
+      const validator = await LicenseValidator.create({ publicKey: publicKeyHex });
       const result = await validator.hasFlag(token, "api");
 
       expect(result.enabled).toBe(false);
@@ -43,7 +43,7 @@ describe("flag checking", () => {
         exp: futureTimestamp(3600),
       });
 
-      const validator = new LicenseValidator({ publicKey: publicKeyHex });
+      const validator = await LicenseValidator.create({ publicKey: publicKeyHex });
       const result = await validator.hasFlag(token, "export");
 
       expect(result.enabled).toBe(false);
@@ -56,7 +56,7 @@ describe("flag checking", () => {
         exp: futureTimestamp(3600),
       });
 
-      const validator = new LicenseValidator({ publicKey: publicKeyHex });
+      const validator = await LicenseValidator.create({ publicKey: publicKeyHex });
       const result = await validator.hasFlag(token, "export");
 
       expect(result.enabled).toBe(false);
@@ -70,7 +70,7 @@ describe("flag checking", () => {
         exp: pastTimestamp(3600),
       });
 
-      const validator = new LicenseValidator({ publicKey: publicKeyHex });
+      const validator = await LicenseValidator.create({ publicKey: publicKeyHex });
       const result = await validator.hasFlag(token, "export");
 
       expect(result.enabled).toBe(false);
@@ -78,7 +78,7 @@ describe("flag checking", () => {
     });
 
     test("returns invalid_token reason for invalid token", async () => {
-      const validator = new LicenseValidator({ publicKey: publicKeyHex });
+      const validator = await LicenseValidator.create({ publicKey: publicKeyHex });
       const result = await validator.hasFlag("invalid-token", "export");
 
       expect(result.enabled).toBe(false);
@@ -94,7 +94,7 @@ describe("flag checking", () => {
         exp: futureTimestamp(3600),
       });
 
-      const validator = new LicenseValidator({ publicKey: publicKeyHex });
+      const validator = await LicenseValidator.create({ publicKey: publicKeyHex });
       const results = await validator.hasFlags(token, ["export", "import", "api"]);
 
       expect(results.get("export")?.enabled).toBe(true);
@@ -104,7 +104,7 @@ describe("flag checking", () => {
     });
 
     test("returns all not enabled for invalid token", async () => {
-      const validator = new LicenseValidator({ publicKey: publicKeyHex });
+      const validator = await LicenseValidator.create({ publicKey: publicKeyHex });
       const results = await validator.hasFlags("invalid", ["export", "import"]);
 
       expect(results.get("export")?.enabled).toBe(false);
@@ -120,7 +120,7 @@ describe("flag checking", () => {
         exp: pastTimestamp(3600),
       });
 
-      const validator = new LicenseValidator({ publicKey: publicKeyHex });
+      const validator = await LicenseValidator.create({ publicKey: publicKeyHex });
       const results = await validator.hasFlags(token, ["export", "import"]);
 
       expect(results.get("export")?.enabled).toBe(false);

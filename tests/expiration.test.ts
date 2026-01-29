@@ -11,7 +11,7 @@ describe("expiration info", () => {
     const exp = futureTimestamp(3600);
     const token = await createToken({ sub: "test", exp });
 
-    const validator = new LicenseValidator({ publicKey: publicKeyHex });
+    const validator = await LicenseValidator.create({ publicKey: publicKeyHex });
     const info = validator.getExpirationInfo(token);
 
     expect(info).not.toBeNull();
@@ -26,7 +26,7 @@ describe("expiration info", () => {
     const exp = pastTimestamp(3600);
     const token = await createToken({ sub: "test", exp });
 
-    const validator = new LicenseValidator({ publicKey: publicKeyHex });
+    const validator = await LicenseValidator.create({ publicKey: publicKeyHex });
     const info = validator.getExpirationInfo(token);
 
     expect(info).not.toBeNull();
@@ -38,7 +38,7 @@ describe("expiration info", () => {
   test("returns null values for token without expiration", async () => {
     const token = await createToken({ sub: "test" });
 
-    const validator = new LicenseValidator({ publicKey: publicKeyHex });
+    const validator = await LicenseValidator.create({ publicKey: publicKeyHex });
     const info = validator.getExpirationInfo(token);
 
     expect(info).not.toBeNull();
@@ -48,8 +48,8 @@ describe("expiration info", () => {
     expect(info?.timeRemaining).toBeNull();
   });
 
-  test("returns null for invalid token", () => {
-    const validator = new LicenseValidator({ publicKey: publicKeyHex });
+  test("returns null for invalid token", async () => {
+    const validator = await LicenseValidator.create({ publicKey: publicKeyHex });
     const info = validator.getExpirationInfo("invalid-token");
 
     expect(info).toBeNull();
@@ -59,7 +59,7 @@ describe("expiration info", () => {
     const exp = futureTimestamp(30);
     const token = await createToken({ sub: "test", exp });
 
-    const validator = new LicenseValidator({ publicKey: publicKeyHex });
+    const validator = await LicenseValidator.create({ publicKey: publicKeyHex });
     const info = validator.getExpirationInfo(token);
 
     expect(info?.timeRemaining).toContain("second");
@@ -69,7 +69,7 @@ describe("expiration info", () => {
     const exp = futureTimestamp(300);
     const token = await createToken({ sub: "test", exp });
 
-    const validator = new LicenseValidator({ publicKey: publicKeyHex });
+    const validator = await LicenseValidator.create({ publicKey: publicKeyHex });
     const info = validator.getExpirationInfo(token);
 
     expect(info?.timeRemaining).toContain("minute");
@@ -79,7 +79,7 @@ describe("expiration info", () => {
     const exp = futureTimestamp(86400 * 5);
     const token = await createToken({ sub: "test", exp });
 
-    const validator = new LicenseValidator({ publicKey: publicKeyHex });
+    const validator = await LicenseValidator.create({ publicKey: publicKeyHex });
     const info = validator.getExpirationInfo(token);
 
     expect(info?.timeRemaining).toContain("day");
@@ -89,7 +89,7 @@ describe("expiration info", () => {
     const exp = 1700000000;
     const token = await createToken({ sub: "test", exp });
 
-    const validator = new LicenseValidator({
+    const validator = await LicenseValidator.create({
       publicKey: publicKeyHex,
       timing: { currentTime: exp - 3600 },
     });

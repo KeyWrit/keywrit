@@ -6,9 +6,9 @@ export type {
   // Configuration
   PublicKeyInput,
   ValidatorConfig,
-  ValidatorConfigWithUrl,
   ClaimMatchers,
   TimingOptions,
+  RevocationList,
   // JWT structure
   JWTHeader,
   StandardClaims,
@@ -50,7 +50,7 @@ export async function validateLicense<T = Record<string, unknown>>(
   token: string,
   config: ValidatorConfig
 ): Promise<ValidationResult<T>> {
-  const validator = new LicenseValidator<T>(config);
+  const validator = await LicenseValidator.create<T>(config);
   return validator.validate(token);
 }
 
@@ -59,7 +59,7 @@ export async function validateLicense<T = Record<string, unknown>>(
  *
  * @example
  * ```typescript
- * const validate = createValidator({
+ * const validate = await createValidator({
  *   publicKey: "d75a980182b10ab...",
  *   claims: { iss: "mycompany" }
  * });
@@ -67,9 +67,9 @@ export async function validateLicense<T = Record<string, unknown>>(
  * const result = await validate(token);
  * ```
  */
-export function createValidator<T = Record<string, unknown>>(
+export async function createValidator<T = Record<string, unknown>>(
   config: ValidatorConfig
-): (token: string) => Promise<ValidationResult<T>> {
-  const validator = new LicenseValidator<T>(config);
+): Promise<(token: string) => Promise<ValidationResult<T>>> {
+  const validator = await LicenseValidator.create<T>(config);
   return (token: string) => validator.validate(token);
 }
