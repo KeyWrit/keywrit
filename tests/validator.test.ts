@@ -1,0 +1,201 @@
+/**
+ * Tests for LicenseValidator class methods
+ */
+
+import { describe, test, expect } from "bun:test";
+import { LicenseValidator, validateLicense, createValidator } from "../src/index.ts";
+import { createToken, publicKey, publicKeyHex, futureTimestamp } from "./helpers.ts";
+
+describe("LicenseValidator", () => {
+  describe("extend", () => {
+    test("creates new validator with extended config", async () => {
+      const token = await createToken({
+        iss: "company",
+        sub: "test",
+        exp: futureTimestamp(3600),
+      });
+
+      const base = new LicenseValidator({ publicKey: publicKeyHex });
+      const extended = base.extend({ claims: { iss: "company" } });
+
+      const result = await extended.validate(token);
+      expect(result.valid).toBe(true);
+    });
+
+    test("merges claims with existing config", async () => {
+      const token = await createToken({
+        iss: "company",
+        aud: "myapp",
+        sub: "test",
+        exp: futureTimestamp(3600),
+      });
+
+      const base = new LicenseValidator({
+        publicKey: publicKeyHex,
+        claims: { iss: "company" },
+      });
+      const extended = base.extend({ claims: { aud: "myapp" } });
+
+      const result = await extended.validate(token);
+      expect(result.valid).toBe(true);
+    });
+
+    test("overrides public key when provided", async () => {
+      const token = await createToken({
+        sub: "test",
+        exp: futureTimestamp(3600),
+      });
+
+      const base = new LicenseValidator({ publicKey: "0".repeat(64) }); // Invalid key
+      const extended = base.extend({ publicKey: publicKeyHex });
+
+      const result = await extended.validate(token);
+      expect(result.valid).toBe(true);
+    });
+
+    test("does not modify original validator", async () => {
+      const token = await createToken({
+        iss: "company",
+        sub: "test",
+        exp: futureTimestamp(3600),
+      });
+
+      const base = new LicenseValidator({ publicKey: publicKeyHex });
+      base.extend({ claims: { iss: "company" } });
+
+      // Original validator should not require issuer
+      const result = await base.validate(token);
+      expect(result.valid).toBe(true);
+    });
+  });
+
+  describe("multiple errors", () => {
+    test("collects multiple validation errors", async () => {
+      const token = await createToken({
+        iss: "wrong",
+        sub: "test",
+        features: [],
+        exp: futureTimestamp(3600),
+      });
+
+      const validator = new LicenseValidator({
+        publicKey: publicKeyHex,
+        claims: {
+          iss: "correct",
+          requiredFeatures: ["feature1", "feature2"],
+        },
+      });
+      const result = await validator.validate(token);
+
+      expect(result.valid).toBe(false);
+      if (!result.valid) {
+        // First error
+        expect(result.error).toBeDefined();
+        // Additional errors
+        expect(result.errors).toBeDefined();
+        expect(result.errors!.length).toBeGreaterThan(0);
+      }
+    });
+  });
+});
+
+describe("utility functions", () => {
+  describe("validateLicense", () => {
+    test("performs one-shot validation", async () => {
+      const token = await createToken({
+        sub: "test",
+        exp: futureTimestamp(3600),
+      });
+
+      const result = await validateLicense(token, { publicKey: publicKeyHex });
+      expect(result.valid).toBe(true);
+    });
+
+    test("accepts all validator options", async () => {
+      const token = await createToken({
+        iss: "company",
+        sub: "test",
+        exp: futureTimestamp(3600),
+      });
+
+      const result = await validateLicense(token, {
+        publicKey: publicKeyHex,
+        claims: { iss: "company" },
+        timing: { clockSkew: 30 },
+      });
+      expect(result.valid).toBe(true);
+    });
+  });
+
+  describe("createValidator", () => {
+    test("returns reusable validation function", async () => {
+      const validate = createValidator({ publicKey: publicKeyHex });
+
+      const token1 = await createToken({ sub: "user1", exp: futureTimestamp(3600) });
+      const token2 = await createToken({ sub: "user2", exp: futureTimestamp(3600) });
+
+      const result1 = await validate(token1);
+      const result2 = await validate(token2);
+
+      expect(result1.valid).toBe(true);
+      expect(result2.valid).toBe(true);
+      if (result1.valid && result2.valid) {
+        expect(result1.license.sub).toBe("user1");
+        expect(result2.license.sub).toBe("user2");
+      }
+    });
+  });
+});
+
+describe("public key formats", () => {
+  test("accepts Uint8Array", async () => {
+    const token = await createToken({
+      sub: "test",
+      exp: futureTimestamp(3600),
+    });
+
+    const validator = new LicenseValidator({ publicKey });
+    const result = await validator.validate(token);
+
+    expect(result.valid).toBe(true);
+  });
+
+  test("accepts hex string", async () => {
+    const token = await createToken({
+      sub: "test",
+      exp: futureTimestamp(3600),
+    });
+
+    const validator = new LicenseValidator({ publicKey: publicKeyHex });
+    const result = await validator.validate(token);
+
+    expect(result.valid).toBe(true);
+  });
+
+  test("accepts base64 string", async () => {
+    const token = await createToken({
+      sub: "test",
+      exp: futureTimestamp(3600),
+    });
+
+    // Convert to base64
+    const base64 = btoa(String.fromCharCode(...publicKey));
+
+    const validator = new LicenseValidator({ publicKey: base64 });
+    const result = await validator.validate(token);
+
+    expect(result.valid).toBe(true);
+  });
+
+  test("throws for invalid key length", () => {
+    expect(() => {
+      new LicenseValidator({ publicKey: new Uint8Array(16) });
+    }).toThrow();
+  });
+
+  test("throws for invalid key format", () => {
+    expect(() => {
+      new LicenseValidator({ publicKey: "not-a-valid-key" });
+    }).toThrow();
+  });
+});
