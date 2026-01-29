@@ -24,7 +24,7 @@ export class LicenseValidator<T = Record<string, unknown>> {
   private readonly publicKey: Uint8Array;
   private readonly config: ValidatorConfig;
 
-  constructor(config: ValidatorConfig) {
+  public constructor(config: ValidatorConfig) {
     this.publicKey = normalizePublicKey(config.publicKey);
     this.config = config;
   }
@@ -32,7 +32,7 @@ export class LicenseValidator<T = Record<string, unknown>> {
   /**
    * Validate a license token
    */
-  async validate(token: string): Promise<ValidationResult<T>> {
+  public async validate(token: string): Promise<ValidationResult<T>> {
     // Decode the token
     const decodeResult = decodeJWT<T>(token);
 
@@ -126,7 +126,7 @@ export class LicenseValidator<T = Record<string, unknown>> {
    * Note: This method validates everything except the signature synchronously,
    * then performs async signature verification.
    */
-  validateSync(token: string): ValidationResult<T> {
+  public validateSync(token: string): ValidationResult<T> {
     // For true sync operation, we'd need sync crypto
     // Currently this is a shim that throws
     throw new Error(
@@ -137,7 +137,7 @@ export class LicenseValidator<T = Record<string, unknown>> {
   /**
    * Check if a feature is enabled in the license
    */
-  async hasFeature(token: string, feature: string): Promise<FeatureCheckResult> {
+  public async hasFeature(token: string, feature: string): Promise<FeatureCheckResult> {
     const result = await this.validate(token);
 
     if (!result.valid) {
@@ -157,7 +157,7 @@ export class LicenseValidator<T = Record<string, unknown>> {
   /**
    * Check multiple features at once
    */
-  async hasFeatures(
+  public async hasFeatures(
     token: string,
     features: string[]
   ): Promise<Map<string, FeatureCheckResult>> {
@@ -188,7 +188,7 @@ export class LicenseValidator<T = Record<string, unknown>> {
   /**
    * Get the tier from a license token
    */
-  async getTier(token: string): Promise<string | null> {
+  public async getTier(token: string): Promise<string | null> {
     const result = await this.validate(token);
     if (!result.valid) {
       return null;
@@ -199,7 +199,7 @@ export class LicenseValidator<T = Record<string, unknown>> {
   /**
    * Check if the license has at least the minimum tier
    */
-  async hasTier(token: string, minimumTier: string): Promise<boolean> {
+  public async hasTier(token: string, minimumTier: string): Promise<boolean> {
     const result = await this.validate(token);
     if (!result.valid) {
       return false;
@@ -224,7 +224,7 @@ export class LicenseValidator<T = Record<string, unknown>> {
   /**
    * Create a new validator with extended configuration
    */
-  extend(config: Partial<ValidatorConfig>): LicenseValidator<T> {
+  public extend(config: Partial<ValidatorConfig>): LicenseValidator<T> {
     return new LicenseValidator({
       ...this.config,
       ...config,
@@ -243,7 +243,7 @@ export class LicenseValidator<T = Record<string, unknown>> {
   /**
    * Get expiration information from a token (without full validation)
    */
-  getExpirationInfo(token: string): ExpirationInfo | null {
+  public getExpirationInfo(token: string): ExpirationInfo | null {
     const payload = decodePayload(token);
     if (!payload) {
       return null;
