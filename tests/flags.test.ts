@@ -1,63 +1,63 @@
 /**
- * Tests for feature checking methods
+ * Tests for flag checking methods
  */
 
 import { describe, test, expect } from "bun:test";
 import { LicenseValidator } from "../src/index.ts";
 import { createToken, publicKeyHex, futureTimestamp, pastTimestamp } from "./helpers.ts";
 
-describe("feature checking", () => {
-  describe("hasFeature", () => {
-    test("returns enabled for present feature", async () => {
+describe("flag checking", () => {
+  describe("hasFlag", () => {
+    test("returns enabled for present flag", async () => {
       const token = await createToken({
         sub: "test",
-        features: ["export", "import"],
+        flags: ["export", "import"],
         exp: futureTimestamp(3600),
       });
 
       const validator = new LicenseValidator({ publicKey: publicKeyHex });
-      const result = await validator.hasFeature(token, "export");
+      const result = await validator.hasFlag(token, "export");
 
       expect(result.enabled).toBe(true);
       expect(result.reason).toBeUndefined();
     });
 
-    test("returns not enabled for missing feature", async () => {
+    test("returns not enabled for missing flag", async () => {
       const token = await createToken({
         sub: "test",
-        features: ["export"],
+        flags: ["export"],
         exp: futureTimestamp(3600),
       });
 
       const validator = new LicenseValidator({ publicKey: publicKeyHex });
-      const result = await validator.hasFeature(token, "api");
+      const result = await validator.hasFlag(token, "api");
 
       expect(result.enabled).toBe(false);
       expect(result.reason).toBe("not_in_license");
     });
 
-    test("returns not enabled for empty features array", async () => {
+    test("returns not enabled for empty flags array", async () => {
       const token = await createToken({
         sub: "test",
-        features: [],
+        flags: [],
         exp: futureTimestamp(3600),
       });
 
       const validator = new LicenseValidator({ publicKey: publicKeyHex });
-      const result = await validator.hasFeature(token, "export");
+      const result = await validator.hasFlag(token, "export");
 
       expect(result.enabled).toBe(false);
       expect(result.reason).toBe("not_in_license");
     });
 
-    test("returns not enabled for missing features claim", async () => {
+    test("returns not enabled for missing flags claim", async () => {
       const token = await createToken({
         sub: "test",
         exp: futureTimestamp(3600),
       });
 
       const validator = new LicenseValidator({ publicKey: publicKeyHex });
-      const result = await validator.hasFeature(token, "export");
+      const result = await validator.hasFlag(token, "export");
 
       expect(result.enabled).toBe(false);
       expect(result.reason).toBe("not_in_license");
@@ -66,12 +66,12 @@ describe("feature checking", () => {
     test("returns expired reason for expired token", async () => {
       const token = await createToken({
         sub: "test",
-        features: ["export"],
+        flags: ["export"],
         exp: pastTimestamp(3600),
       });
 
       const validator = new LicenseValidator({ publicKey: publicKeyHex });
-      const result = await validator.hasFeature(token, "export");
+      const result = await validator.hasFlag(token, "export");
 
       expect(result.enabled).toBe(false);
       expect(result.reason).toBe("expired");
@@ -79,23 +79,23 @@ describe("feature checking", () => {
 
     test("returns invalid_token reason for invalid token", async () => {
       const validator = new LicenseValidator({ publicKey: publicKeyHex });
-      const result = await validator.hasFeature("invalid-token", "export");
+      const result = await validator.hasFlag("invalid-token", "export");
 
       expect(result.enabled).toBe(false);
       expect(result.reason).toBe("invalid_token");
     });
   });
 
-  describe("hasFeatures", () => {
-    test("checks multiple features at once", async () => {
+  describe("hasFlags", () => {
+    test("checks multiple flags at once", async () => {
       const token = await createToken({
         sub: "test",
-        features: ["export", "import"],
+        flags: ["export", "import"],
         exp: futureTimestamp(3600),
       });
 
       const validator = new LicenseValidator({ publicKey: publicKeyHex });
-      const results = await validator.hasFeatures(token, ["export", "import", "api"]);
+      const results = await validator.hasFlags(token, ["export", "import", "api"]);
 
       expect(results.get("export")?.enabled).toBe(true);
       expect(results.get("import")?.enabled).toBe(true);
@@ -105,7 +105,7 @@ describe("feature checking", () => {
 
     test("returns all not enabled for invalid token", async () => {
       const validator = new LicenseValidator({ publicKey: publicKeyHex });
-      const results = await validator.hasFeatures("invalid", ["export", "import"]);
+      const results = await validator.hasFlags("invalid", ["export", "import"]);
 
       expect(results.get("export")?.enabled).toBe(false);
       expect(results.get("export")?.reason).toBe("invalid_token");
@@ -116,12 +116,12 @@ describe("feature checking", () => {
     test("returns all expired for expired token", async () => {
       const token = await createToken({
         sub: "test",
-        features: ["export", "import"],
+        flags: ["export", "import"],
         exp: pastTimestamp(3600),
       });
 
       const validator = new LicenseValidator({ publicKey: publicKeyHex });
-      const results = await validator.hasFeatures(token, ["export", "import"]);
+      const results = await validator.hasFlags(token, ["export", "import"]);
 
       expect(results.get("export")?.enabled).toBe(false);
       expect(results.get("export")?.reason).toBe("expired");

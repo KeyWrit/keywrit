@@ -151,53 +151,52 @@ export function validateClaimMatchers(
     }
   }
 
-  // Check required features
-  if (matchers.requiredFeatures && matchers.requiredFeatures.length > 0) {
-    const licenseFeatures = payload.features ?? [];
-    for (const feature of matchers.requiredFeatures) {
-      if (!licenseFeatures.includes(feature)) {
+  // Check required flags
+  if (matchers.requiredFlags && matchers.requiredFlags.length > 0) {
+    const licenseFlags = payload.flags ?? [];
+    for (const flag of matchers.requiredFlags) {
+      if (!licenseFlags.includes(flag)) {
         errors.push({
-          code: "MISSING_REQUIRED_FEATURE",
-          message: `Missing required feature: "${feature}"`,
+          code: "MISSING_REQUIRED_FLAG",
+          message: `Missing required flag: "${flag}"`,
           details: {
-            requiredFeature: feature,
-            availableFeatures: licenseFeatures,
+            requiredFlag: flag,
+            availableFlags: licenseFlags,
           },
         });
       }
     }
   }
 
-  // Check minimum tier
-  if (matchers.minimumTier !== undefined) {
-    const hierarchy = matchers.tierHierarchy ?? ["free", "pro", "enterprise"];
-    const minimumIndex = hierarchy.indexOf(matchers.minimumTier);
-    const actualIndex = payload.tier
-      ? hierarchy.indexOf(payload.tier)
-      : -1;
+  // Check required kind (exact match)
+  if (matchers.requiredKind !== undefined) {
+    if (payload.kind !== matchers.requiredKind) {
+      errors.push({
+        code: "KIND_MISMATCH",
+        message: `Kind mismatch: expected "${matchers.requiredKind}", got "${payload.kind ?? "(none)"}"`,
+        details: {
+          requiredKind: matchers.requiredKind,
+          actualKind: payload.kind,
+        },
+      });
+    }
+  }
 
-    if (minimumIndex === -1) {
-      // Unknown minimum tier, skip validation
-    } else if (actualIndex === -1) {
-      errors.push({
-        code: "INSUFFICIENT_TIER",
-        message: `Unknown tier: "${payload.tier ?? "(none)"}"`,
-        details: {
-          minimumTier: matchers.minimumTier,
-          actualTier: payload.tier,
-          hierarchy,
-        },
-      });
-    } else if (actualIndex < minimumIndex) {
-      errors.push({
-        code: "INSUFFICIENT_TIER",
-        message: `Insufficient tier: requires "${matchers.minimumTier}", license has "${payload.tier}"`,
-        details: {
-          minimumTier: matchers.minimumTier,
-          actualTier: payload.tier,
-          hierarchy,
-        },
-      });
+  // Check required features (keys in the features map)
+  if (matchers.requiredFeatures && matchers.requiredFeatures.length > 0) {
+    const licenseFeatures = payload.features ?? {};
+    const availableKeys = Object.keys(licenseFeatures);
+    for (const feature of matchers.requiredFeatures) {
+      if (!(feature in licenseFeatures)) {
+        errors.push({
+          code: "MISSING_REQUIRED_FEATURE",
+          message: `Missing required feature: "${feature}"`,
+          details: {
+            requiredFeature: feature,
+            availableFeatures: availableKeys,
+          },
+        });
+      }
     }
   }
 

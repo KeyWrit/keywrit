@@ -66,7 +66,7 @@ describe("signature verification", () => {
   test("provides unverified payload on signature failure", async () => {
     const otherPrivate = ed25519.utils.randomSecretKey();
     const token = await createToken(
-      { sub: "test", tier: "pro", exp: futureTimestamp(3600) },
+      { sub: "test", kind: "pro", exp: futureTimestamp(3600) },
       { privateKey: otherPrivate }
     );
 
@@ -76,7 +76,7 @@ describe("signature verification", () => {
     expect(result.valid).toBe(false);
     if (!result.valid) {
       expect(result.unverifiedPayload?.sub).toBe("test");
-      expect(result.unverifiedPayload?.tier).toBe("pro");
+      expect(result.unverifiedPayload?.kind).toBe("pro");
     }
   });
 });

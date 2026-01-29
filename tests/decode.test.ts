@@ -35,11 +35,11 @@ describe("decode", () => {
 
 describe("decodePayload", () => {
   test("extracts payload only", async () => {
-    const token = await createToken({ sub: "test", tier: "pro" });
+    const token = await createToken({ sub: "test", kind: "pro" });
     const payload = decodePayload(token);
 
     expect(payload?.sub).toBe("test");
-    expect(payload?.tier).toBe("pro");
+    expect(payload?.kind).toBe("pro");
   });
 
   test("returns null for invalid token", () => {
@@ -52,19 +52,17 @@ describe("decodePayload", () => {
       sub: "user@example.com",
       iss: "mycompany",
       aud: ["app1", "app2"],
-      features: ["export", "import"],
-      tier: "enterprise",
-      seats: 100,
-      meta: { region: "us-west" },
+      flags: ["export", "import"],
+      kind: "enterprise",
+      features: { region: "us-west" },
     });
     const payload = decodePayload(token);
 
     expect(payload?.sub).toBe("user@example.com");
     expect(payload?.iss).toBe("mycompany");
     expect(payload?.aud).toEqual(["app1", "app2"]);
-    expect(payload?.features).toEqual(["export", "import"]);
-    expect(payload?.tier).toBe("enterprise");
-    expect(payload?.seats).toBe(100);
-    expect(payload?.meta).toEqual({ region: "us-west" });
+    expect(payload?.flags).toEqual(["export", "import"]);
+    expect(payload?.kind).toBe("enterprise");
+    expect(payload?.features).toEqual({ region: "us-west" });
   });
 });

@@ -13,8 +13,9 @@ export type ValidationErrorCode =
   | "TOKEN_EXPIRED"
   | "TOKEN_NOT_YET_VALID"
   | "CLAIM_MISMATCH"
+  | "MISSING_REQUIRED_FLAG"
   | "MISSING_REQUIRED_FEATURE"
-  | "INSUFFICIENT_TIER"
+  | "KIND_MISMATCH"
   | "EXPIRATION_REQUIRED";
 
 /** Validation error with code and details */
@@ -58,8 +59,8 @@ export type ValidationResult<T = Record<string, unknown>> =
   | ValidationSuccess<T>
   | ValidationFailure;
 
-/** Result of a feature check */
-export interface FeatureCheckResult {
+/** Result of a flag check */
+export interface FlagCheckResult {
   enabled: boolean;
   /** Reason if not enabled */
   reason?: "not_in_license" | "invalid_token" | "expired";

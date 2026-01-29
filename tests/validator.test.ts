@@ -7,6 +7,44 @@ import { LicenseValidator, validateLicense, createValidator } from "../src/index
 import { createToken, publicKey, publicKeyHex, futureTimestamp } from "./helpers.ts";
 
 describe("LicenseValidator", () => {
+  describe("getLicense", () => {
+    test("returns license payload for valid token", async () => {
+      const token = await createToken({
+        sub: "user@example.com",
+        kind: "pro",
+        flags: ["export", "import"],
+        exp: futureTimestamp(3600),
+      });
+
+      const validator = new LicenseValidator({ publicKey: publicKeyHex });
+      const license = await validator.getLicense(token);
+
+      expect(license).not.toBeNull();
+      expect(license?.sub).toBe("user@example.com");
+      expect(license?.kind).toBe("pro");
+      expect(license?.flags).toEqual(["export", "import"]);
+    });
+
+    test("returns null for invalid token", async () => {
+      const validator = new LicenseValidator({ publicKey: publicKeyHex });
+      const license = await validator.getLicense("invalid-token");
+
+      expect(license).toBeNull();
+    });
+
+    test("returns null for expired token", async () => {
+      const token = await createToken({
+        sub: "test",
+        exp: Math.floor(Date.now() / 1000) - 3600,
+      });
+
+      const validator = new LicenseValidator({ publicKey: publicKeyHex });
+      const license = await validator.getLicense(token);
+
+      expect(license).toBeNull();
+    });
+  });
+
   describe("extend", () => {
     test("creates new validator with extended config", async () => {
       const token = await createToken({
@@ -74,7 +112,7 @@ describe("LicenseValidator", () => {
       const token = await createToken({
         iss: "wrong",
         sub: "test",
-        features: [],
+        flags: [],
         exp: futureTimestamp(3600),
       });
 
@@ -82,7 +120,7 @@ describe("LicenseValidator", () => {
         publicKey: publicKeyHex,
         claims: {
           iss: "correct",
-          requiredFeatures: ["feature1", "feature2"],
+          requiredFlags: ["flag1", "flag2"],
         },
       });
       const result = await validator.validate(token);

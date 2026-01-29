@@ -13,12 +13,12 @@ export interface ClaimMatchers {
   aud?: string | string[];
   /** Expected subject */
   sub?: string;
-  /** Required features that must be present */
+  /** Required flags that must be present in the flags array */
+  requiredFlags?: string[];
+  /** Required kind (exact match) */
+  requiredKind?: string;
+  /** Required feature keys that must be present in the features map */
   requiredFeatures?: string[];
-  /** Minimum required tier */
-  minimumTier?: string;
-  /** Tier hierarchy for comparison (lower index = lower tier) */
-  tierHierarchy?: string[];
 }
 
 /** Timing options for validation */

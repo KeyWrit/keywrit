@@ -28,14 +28,12 @@ export interface StandardClaims {
 
 /** License-specific claims */
 export interface LicenseClaims {
-  /** License tier (e.g., "free", "pro", "enterprise") */
-  tier?: string;
-  /** Array of enabled feature flags */
-  features?: string[];
-  /** Number of allowed seats */
-  seats?: number;
-  /** Arbitrary metadata */
-  meta?: Record<string, unknown>;
+  /** License kind (e.g., "free", "pro", "enterprise") */
+  kind?: string;
+  /** Array of enabled flags */
+  flags?: string[];
+  /** Arbitrary features/metadata */
+  features?: Record<string, unknown>;
 }
 
 /** Complete license payload combining standard and license claims */

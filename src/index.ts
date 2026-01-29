@@ -22,8 +22,8 @@ export type {
   ValidationErrorCode,
   ValidationWarning,
   ValidationWarningCode,
-  // Feature checking
-  FeatureCheckResult,
+  // Flag checking
+  FlagCheckResult,
   ExpirationInfo,
 } from "./types/index.ts";
 

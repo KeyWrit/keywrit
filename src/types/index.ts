@@ -28,6 +28,6 @@ export type {
   ValidationSuccess,
   ValidationFailure,
   ValidationResult,
-  FeatureCheckResult,
+  FlagCheckResult,
   ExpirationInfo,
 } from "./validation.ts";

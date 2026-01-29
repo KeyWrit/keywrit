@@ -6,7 +6,7 @@ import type {
   ValidatorConfig,
   ValidationResult,
   LicensePayload,
-  FeatureCheckResult,
+  FlagCheckResult,
   ExpirationInfo,
   ValidationWarning,
 } from "./types/index.ts";
@@ -135,9 +135,20 @@ export class LicenseValidator<T = Record<string, unknown>> {
   }
 
   /**
-   * Check if a feature is enabled in the license
+   * Get the license payload if valid, null otherwise
    */
-  public async hasFeature(token: string, feature: string): Promise<FeatureCheckResult> {
+  public async getLicense(token: string): Promise<LicensePayload<T> | null> {
+    const result = await this.validate(token);
+    if (!result.valid) {
+      return null;
+    }
+    return result.license;
+  }
+
+  /**
+   * Check if a flag is enabled in the license
+   */
+  public async hasFlag(token: string, flag: string): Promise<FlagCheckResult> {
     const result = await this.validate(token);
 
     if (!result.valid) {
@@ -146,8 +157,8 @@ export class LicenseValidator<T = Record<string, unknown>> {
       return { enabled: false, reason };
     }
 
-    const features = result.license.features ?? [];
-    if (features.includes(feature)) {
+    const flags = result.license.flags ?? [];
+    if (flags.includes(flag)) {
       return { enabled: true };
     }
 
@@ -155,30 +166,30 @@ export class LicenseValidator<T = Record<string, unknown>> {
   }
 
   /**
-   * Check multiple features at once
+   * Check multiple flags at once
    */
-  public async hasFeatures(
+  public async hasFlags(
     token: string,
-    features: string[]
-  ): Promise<Map<string, FeatureCheckResult>> {
+    flags: string[]
+  ): Promise<Map<string, FlagCheckResult>> {
     const result = await this.validate(token);
-    const results = new Map<string, FeatureCheckResult>();
+    const results = new Map<string, FlagCheckResult>();
 
     if (!result.valid) {
       const reason =
         result.error.code === "TOKEN_EXPIRED" ? "expired" : "invalid_token";
-      for (const feature of features) {
-        results.set(feature, { enabled: false, reason });
+      for (const flag of flags) {
+        results.set(flag, { enabled: false, reason });
       }
       return results;
     }
 
-    const licenseFeatures = result.license.features ?? [];
-    for (const feature of features) {
-      if (licenseFeatures.includes(feature)) {
-        results.set(feature, { enabled: true });
+    const licenseFlags = result.license.flags ?? [];
+    for (const flag of flags) {
+      if (licenseFlags.includes(flag)) {
+        results.set(flag, { enabled: true });
       } else {
-        results.set(feature, { enabled: false, reason: "not_in_license" });
+        results.set(flag, { enabled: false, reason: "not_in_license" });
       }
     }
 
@@ -186,39 +197,55 @@ export class LicenseValidator<T = Record<string, unknown>> {
   }
 
   /**
-   * Get the tier from a license token
+   * Get the kind from a license token
    */
-  public async getTier(token: string): Promise<string | null> {
+  public async getKind(token: string): Promise<string | null> {
     const result = await this.validate(token);
     if (!result.valid) {
       return null;
     }
-    return result.license.tier ?? null;
+    return result.license.kind ?? null;
   }
 
   /**
-   * Check if the license has at least the minimum tier
+   * Check if the license has the specified kind (exact match)
    */
-  public async hasTier(token: string, minimumTier: string): Promise<boolean> {
+  public async hasKind(token: string, kind: string): Promise<boolean> {
     const result = await this.validate(token);
     if (!result.valid) {
       return false;
     }
+    return result.license.kind === kind;
+  }
 
-    const hierarchy = this.config.claims?.tierHierarchy ?? [
-      "free",
-      "pro",
-      "enterprise",
-    ];
-    const minimumIndex = hierarchy.indexOf(minimumTier);
-    const actualTier = result.license.tier;
-    const actualIndex = actualTier ? hierarchy.indexOf(actualTier) : -1;
+  /**
+   * Get a feature value from the license features map
+   */
+  public async getFeature<V = unknown>(
+    token: string,
+    feature: string
+  ): Promise<V | null> {
+    const result = await this.validate(token);
+    if (!result.valid) {
+      return null;
+    }
+    const features = result.license.features ?? {};
+    if (feature in features) {
+      return features[feature] as V;
+    }
+    return null;
+  }
 
-    if (minimumIndex === -1 || actualIndex === -1) {
+  /**
+   * Check if a feature exists in the license features map
+   */
+  public async hasFeature(token: string, feature: string): Promise<boolean> {
+    const result = await this.validate(token);
+    if (!result.valid) {
       return false;
     }
-
-    return actualIndex >= minimumIndex;
+    const features = result.license.features ?? {};
+    return feature in features;
   }
 
   /**

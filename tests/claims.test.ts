@@ -169,17 +169,130 @@ describe("claim matchers", () => {
     });
   });
 
-  describe("required features", () => {
-    test("validates when all required features present", async () => {
+  describe("required flags", () => {
+    test("validates when all required flags present", async () => {
       const token = await createToken({
         sub: "test",
-        features: ["export", "import", "api"],
+        flags: ["export", "import", "api"],
         exp: futureTimestamp(3600),
       });
 
       const validator = new LicenseValidator({
         publicKey: publicKeyHex,
-        claims: { requiredFeatures: ["export", "api"] },
+        claims: { requiredFlags: ["export", "api"] },
+      });
+      const result = await validator.validate(token);
+
+      expect(result.valid).toBe(true);
+    });
+
+    test("rejects when missing required flag", async () => {
+      const token = await createToken({
+        sub: "test",
+        flags: ["export"],
+        exp: futureTimestamp(3600),
+      });
+
+      const validator = new LicenseValidator({
+        publicKey: publicKeyHex,
+        claims: { requiredFlags: ["export", "api"] },
+      });
+      const result = await validator.validate(token);
+
+      expect(result.valid).toBe(false);
+      if (!result.valid) {
+        expect(result.error.code).toBe("MISSING_REQUIRED_FLAG");
+        expect(result.error.details?.requiredFlag).toBe("api");
+      }
+    });
+
+    test("rejects when flags array is missing", async () => {
+      const token = await createToken({
+        sub: "test",
+        exp: futureTimestamp(3600),
+      });
+
+      const validator = new LicenseValidator({
+        publicKey: publicKeyHex,
+        claims: { requiredFlags: ["export"] },
+      });
+      const result = await validator.validate(token);
+
+      expect(result.valid).toBe(false);
+      if (!result.valid) {
+        expect(result.error.code).toBe("MISSING_REQUIRED_FLAG");
+      }
+    });
+  });
+
+  describe("required kind", () => {
+    test("validates when kind matches exactly", async () => {
+      const token = await createToken({
+        sub: "test",
+        kind: "pro",
+        exp: futureTimestamp(3600),
+      });
+
+      const validator = new LicenseValidator({
+        publicKey: publicKeyHex,
+        claims: { requiredKind: "pro" },
+      });
+      const result = await validator.validate(token);
+
+      expect(result.valid).toBe(true);
+    });
+
+    test("rejects when kind does not match", async () => {
+      const token = await createToken({
+        sub: "test",
+        kind: "free",
+        exp: futureTimestamp(3600),
+      });
+
+      const validator = new LicenseValidator({
+        publicKey: publicKeyHex,
+        claims: { requiredKind: "pro" },
+      });
+      const result = await validator.validate(token);
+
+      expect(result.valid).toBe(false);
+      if (!result.valid) {
+        expect(result.error.code).toBe("KIND_MISMATCH");
+        expect(result.error.details?.requiredKind).toBe("pro");
+        expect(result.error.details?.actualKind).toBe("free");
+      }
+    });
+
+    test("rejects when kind is missing", async () => {
+      const token = await createToken({
+        sub: "test",
+        exp: futureTimestamp(3600),
+      });
+
+      const validator = new LicenseValidator({
+        publicKey: publicKeyHex,
+        claims: { requiredKind: "pro" },
+      });
+      const result = await validator.validate(token);
+
+      expect(result.valid).toBe(false);
+      if (!result.valid) {
+        expect(result.error.code).toBe("KIND_MISMATCH");
+      }
+    });
+  });
+
+  describe("required features", () => {
+    test("validates when all required features present", async () => {
+      const token = await createToken({
+        sub: "test",
+        features: { maxUsers: 100, region: "us-west", customBranding: true },
+        exp: futureTimestamp(3600),
+      });
+
+      const validator = new LicenseValidator({
+        publicKey: publicKeyHex,
+        claims: { requiredFeatures: ["maxUsers", "region"] },
       });
       const result = await validator.validate(token);
 
@@ -189,24 +302,24 @@ describe("claim matchers", () => {
     test("rejects when missing required feature", async () => {
       const token = await createToken({
         sub: "test",
-        features: ["export"],
+        features: { maxUsers: 100 },
         exp: futureTimestamp(3600),
       });
 
       const validator = new LicenseValidator({
         publicKey: publicKeyHex,
-        claims: { requiredFeatures: ["export", "api"] },
+        claims: { requiredFeatures: ["maxUsers", "region"] },
       });
       const result = await validator.validate(token);
 
       expect(result.valid).toBe(false);
       if (!result.valid) {
         expect(result.error.code).toBe("MISSING_REQUIRED_FEATURE");
-        expect(result.error.details?.requiredFeature).toBe("api");
+        expect(result.error.details?.requiredFeature).toBe("region");
       }
     });
 
-    test("rejects when features array is missing", async () => {
+    test("rejects when features map is missing", async () => {
       const token = await createToken({
         sub: "test",
         exp: futureTimestamp(3600),
@@ -214,104 +327,13 @@ describe("claim matchers", () => {
 
       const validator = new LicenseValidator({
         publicKey: publicKeyHex,
-        claims: { requiredFeatures: ["export"] },
+        claims: { requiredFeatures: ["maxUsers"] },
       });
       const result = await validator.validate(token);
 
       expect(result.valid).toBe(false);
       if (!result.valid) {
         expect(result.error.code).toBe("MISSING_REQUIRED_FEATURE");
-      }
-    });
-  });
-
-  describe("minimum tier", () => {
-    test("validates when tier meets minimum (exact match)", async () => {
-      const token = await createToken({
-        sub: "test",
-        tier: "pro",
-        exp: futureTimestamp(3600),
-      });
-
-      const validator = new LicenseValidator({
-        publicKey: publicKeyHex,
-        claims: { minimumTier: "pro" },
-      });
-      const result = await validator.validate(token);
-
-      expect(result.valid).toBe(true);
-    });
-
-    test("validates when tier exceeds minimum", async () => {
-      const token = await createToken({
-        sub: "test",
-        tier: "enterprise",
-        exp: futureTimestamp(3600),
-      });
-
-      const validator = new LicenseValidator({
-        publicKey: publicKeyHex,
-        claims: { minimumTier: "pro" },
-      });
-      const result = await validator.validate(token);
-
-      expect(result.valid).toBe(true);
-    });
-
-    test("rejects insufficient tier", async () => {
-      const token = await createToken({
-        sub: "test",
-        tier: "free",
-        exp: futureTimestamp(3600),
-      });
-
-      const validator = new LicenseValidator({
-        publicKey: publicKeyHex,
-        claims: { minimumTier: "pro" },
-      });
-      const result = await validator.validate(token);
-
-      expect(result.valid).toBe(false);
-      if (!result.valid) {
-        expect(result.error.code).toBe("INSUFFICIENT_TIER");
-      }
-    });
-
-    test("uses custom tier hierarchy", async () => {
-      const token = await createToken({
-        sub: "test",
-        tier: "gold",
-        exp: futureTimestamp(3600),
-      });
-
-      const validator = new LicenseValidator({
-        publicKey: publicKeyHex,
-        claims: {
-          minimumTier: "silver",
-          tierHierarchy: ["bronze", "silver", "gold", "platinum"],
-        },
-      });
-      const result = await validator.validate(token);
-
-      expect(result.valid).toBe(true);
-    });
-
-    test("rejects unknown tier", async () => {
-      const token = await createToken({
-        sub: "test",
-        tier: "unknown",
-        exp: futureTimestamp(3600),
-      });
-
-      const validator = new LicenseValidator({
-        publicKey: publicKeyHex,
-        claims: { minimumTier: "pro" },
-      });
-      const result = await validator.validate(token);
-
-      expect(result.valid).toBe(false);
-      if (!result.valid) {
-        expect(result.error.code).toBe("INSUFFICIENT_TIER");
       }
     });
   });
