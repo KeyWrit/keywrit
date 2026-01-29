@@ -6,6 +6,7 @@ import type {
   ValidatorConfig,
   RevocationList,
   ValidationResult,
+  ValidationError,
   LicensePayload,
   FlagCheckResult,
   ExpirationInfo,
@@ -109,7 +110,10 @@ export class LicenseValidator<T = Record<string, unknown>> {
     const decoded = decodeResult.data;
 
     // Verify signature
-    const verifyResult = await verifySignature(decoded, this.publicKey);
+    const verifyResult = await verifySignature(
+      decoded as import("./types/index.ts").DecodedJWT,
+      this.publicKey
+    );
 
     if (!verifyResult.success) {
       return {
@@ -120,7 +124,7 @@ export class LicenseValidator<T = Record<string, unknown>> {
     }
 
     // Check revocation
-    const revocationResult = await this.checkRevocation(decoded.payload);
+    const revocationResult = await this.checkRevocation(decoded.payload as LicensePayload);
     if (revocationResult) {
       return {
         valid: false,
@@ -130,12 +134,12 @@ export class LicenseValidator<T = Record<string, unknown>> {
     }
 
     // Collect all errors and warnings
-    const allErrors: typeof verifyResult.error[] = [];
+    const allErrors: ValidationError[] = [];
     const allWarnings: ValidationWarning[] = [];
 
     // Validate timing claims
     const timingResult = validateTimingClaims(
-      decoded.payload,
+      decoded.payload as LicensePayload,
       this.timing,
       this.allowNoExpiration
     );
@@ -145,7 +149,7 @@ export class LicenseValidator<T = Record<string, unknown>> {
     // Validate claim matchers
     if (this.claims) {
       const claimResult = validateClaimMatchers(
-        decoded.payload,
+        decoded.payload as LicensePayload,
         this.claims
       );
       allErrors.push(...claimResult.errors);
@@ -382,7 +386,7 @@ export class LicenseValidator<T = Record<string, unknown>> {
       if (!response.ok) {
         return null;
       }
-      return await response.json();
+      return (await response.json()) as RevocationList;
     } catch {
       return null;
     }

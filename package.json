@@ -23,7 +23,8 @@
     "build": "bunup",
     "dev": "bunup --watch",
     "test": "bun test",
-    "coverage": "bun test --coverage"
+    "coverage": "bun test --coverage",
+    "typecheck": "tsc --noEmit"
   },
 
   "dependencies": {
