@@ -1,25 +1,35 @@
 {
   "name": "keywrit",
-  "version": "0.0.1",
-
+  "version": "0.0.2",
   "type": "module",
-  "main": "dist/index.js",
+
+  "main": "dist/index.cjs",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
+  "unpkg": "dist/index.global.js",
+  "jsdelivr": "dist/index.global.js",
+
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
     }
   },
+
   "files": ["dist", "README.md"],
 
   "scripts": {
-    "build": "bun build src/index.ts --outdir dist && tsc -p tsconfig.build.json"
+    "build": "bunup",
+    "dev": "bunup --watch"
   },
 
+  "dependencies": {
+    "@noble/ed25519": "^3.0.0"
+  },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "bunup": "^0.16.21"
   },
   "peerDependencies": {
     "typescript": "^5"

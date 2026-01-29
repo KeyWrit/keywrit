@@ -1,1 +1,3 @@
-console.log("Hello via Bun!");
+export function main(name: string) {
+    console.log(`Hello ${name} via Bun!`);
+}
