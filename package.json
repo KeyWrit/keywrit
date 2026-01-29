@@ -21,7 +21,9 @@
 
   "scripts": {
     "build": "bunup",
-    "dev": "bunup --watch"
+    "dev": "bunup --watch",
+    "test": "bun test",
+    "coverage": "bun test --coverage"
   },
 
   "dependencies": {
