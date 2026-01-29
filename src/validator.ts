@@ -4,6 +4,7 @@
 
 import type {
   ValidatorConfig,
+  ValidatorConfigWithUrl,
   ValidationResult,
   LicensePayload,
   FlagCheckResult,
@@ -27,6 +28,27 @@ export class LicenseValidator<T = Record<string, unknown>> {
   public constructor(config: ValidatorConfig) {
     this.publicKey = normalizePublicKey(config.publicKey);
     this.config = config;
+  }
+
+  /**
+   * Create a validator by fetching the public key from a URL
+   */
+  public static async create<T = Record<string, unknown>>(
+    config: ValidatorConfigWithUrl
+  ): Promise<LicenseValidator<T>> {
+    const response = await fetch(config.publicKeyUrl);
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch public key from ${config.publicKeyUrl}: ${response.status} ${response.statusText}`
+      );
+    }
+
+    const publicKey = (await response.text()).trim();
+
+    return new LicenseValidator<T>({
+      ...config,
+      publicKey,
+    });
   }
 
   /**

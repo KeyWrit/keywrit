@@ -17,6 +17,7 @@ export type {
   ClaimMatchers,
   TimingOptions,
   ValidatorConfig,
+  ValidatorConfigWithUrl,
 } from "./config.ts";
 
 // Validation types

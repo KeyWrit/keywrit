@@ -6,6 +6,7 @@ export type {
   // Configuration
   PublicKeyInput,
   ValidatorConfig,
+  ValidatorConfigWithUrl,
   ClaimMatchers,
   TimingOptions,
   // JWT structure

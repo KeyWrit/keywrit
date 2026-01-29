@@ -29,14 +29,24 @@ export interface TimingOptions {
   currentTime?: number;
 }
 
-/** Validator configuration */
-export interface ValidatorConfig {
-  /** Ed25519 public key for signature verification */
-  publicKey: PublicKeyInput;
+/** Base validator configuration options */
+export interface ValidatorConfigBase {
   /** Claim matchers for validation */
   claims?: ClaimMatchers;
   /** Timing options */
   timing?: TimingOptions;
   /** Allow tokens without expiration (default: false) */
   allowNoExpiration?: boolean;
+}
+
+/** Validator configuration with direct public key */
+export interface ValidatorConfig extends ValidatorConfigBase {
+  /** Ed25519 public key for signature verification */
+  publicKey: PublicKeyInput;
+}
+
+/** Validator configuration with public key URL */
+export interface ValidatorConfigWithUrl extends ValidatorConfigBase {
+  /** URL to fetch the Ed25519 public key from */
+  publicKeyUrl: string;
 }
