@@ -36,6 +36,13 @@ export interface LicenseClaims {
   flags?: string[];
   /** Arbitrary features/metadata */
   features?: Record<string, unknown>;
+  /**
+   * Allowed domains for client-side usage.
+   * Supports wildcards (e.g., "*.example.org" matches "foo.example.org").
+   * If set to empty array, no domains are allowed.
+   * If undefined, domain checking is not enforced.
+   */
+  allowedDomains?: string[];
 }
 
 /** Complete license payload combining standard and license claims */

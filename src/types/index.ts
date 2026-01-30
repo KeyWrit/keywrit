@@ -30,4 +30,5 @@ export type {
   ValidationResult,
   FlagCheckResult,
   ExpirationInfo,
+  DomainCheckResult,
 } from "./validation.ts";

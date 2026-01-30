@@ -20,7 +20,8 @@ export type ValidationErrorCode =
   | "EXPIRATION_REQUIRED"
   | "INVALID_ISSUER"
   | "INVALID_AUDIENCE"
-  | "UNSUPPORTED_VERSION";
+  | "UNSUPPORTED_VERSION"
+  | "DOMAIN_NOT_ALLOWED";
 
 /** Validation error with code and details */
 export interface ValidationError {
@@ -80,4 +81,16 @@ export interface ExpirationInfo {
   secondsRemaining: number | null;
   /** Human-readable time until expiration */
   timeRemaining: string | null;
+}
+
+/** Result of a domain check */
+export interface DomainCheckResult {
+  allowed: boolean;
+  /** Reason if not allowed */
+  reason?:
+    | "domain_not_in_list"
+    | "empty_allowlist"
+    | "no_restrictions"
+    | "invalid_token"
+    | "expired";
 }

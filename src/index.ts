@@ -32,6 +32,7 @@ export type {
   // Flag checking
   FlagCheckResult,
   ExpirationInfo,
+  DomainCheckResult,
 } from "./types/index.ts";
 
 // Utility functions

@@ -11,6 +11,7 @@ import type {
   FlagCheckResult,
   ExpirationInfo,
   ValidationWarning,
+  DomainCheckResult,
 } from "./types/index.ts";
 import { decodeJWT, decodePayload } from "./jwt/decode.ts";
 import { verifySignature } from "./jwt/verify.ts";
@@ -19,6 +20,38 @@ import { validateInternalClaims } from "./jwt/internal-claims.ts";
 import { normalizePublicKey } from "./utils/keys.ts";
 import { now, formatDuration } from "./utils/time.ts";
 import { malformedToken, invalidHeader, invalidPayload } from "./errors.ts";
+
+/**
+ * Check if a hostname matches a domain pattern.
+ * Supports wildcards: "*.example.org" matches "foo.example.org", "bar.baz.example.org"
+ */
+function matchesDomain(hostname: string, pattern: string): boolean {
+  const normalizedHost = hostname.toLowerCase();
+  const normalizedPattern = pattern.toLowerCase();
+
+  if (normalizedHost === normalizedPattern) {
+    return true;
+  }
+
+  if (normalizedPattern.startsWith("*.")) {
+    const suffix = normalizedPattern.slice(1); // ".example.org"
+    if (normalizedHost.endsWith(suffix) && normalizedHost.length > suffix.length) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Check if a hostname is allowed by any of the domain patterns.
+ */
+function isDomainAllowed(hostname: string, allowedDomains: string[]): boolean {
+  if (allowedDomains.length === 0) {
+    return false;
+  }
+  return allowedDomains.some((pattern) => matchesDomain(hostname, pattern));
+}
 
 /**
  * License validator for JWT-based license keys
@@ -316,6 +349,58 @@ export class LicenseValidator<T = Record<string, unknown>> {
     }
     const features = result.license.features ?? {};
     return feature in features;
+  }
+
+  /**
+   * Check if a hostname is allowed by the license's allowedDomains.
+   * Use this in browser environments to verify the current domain is permitted.
+   *
+   * @param token - The license token
+   * @param hostname - The hostname to check (e.g., window.location.hostname)
+   * @returns DomainCheckResult indicating if the domain is allowed
+   */
+  public async checkDomain(
+    token: string,
+    hostname: string
+  ): Promise<DomainCheckResult> {
+    const result = await this.validate(token);
+
+    if (!result.valid) {
+      const reason =
+        result.error.code === "TOKEN_EXPIRED" ? "expired" : "invalid_token";
+      return { allowed: false, reason };
+    }
+
+    const allowedDomains = result.license.allowedDomains;
+
+    // If allowedDomains is not set, no domain restrictions apply
+    if (allowedDomains === undefined) {
+      return { allowed: true, reason: "no_restrictions" };
+    }
+
+    // Empty array means no domains are allowed
+    if (allowedDomains.length === 0) {
+      return { allowed: false, reason: "empty_allowlist" };
+    }
+
+    // Check if hostname matches any allowed pattern
+    if (isDomainAllowed(hostname, allowedDomains)) {
+      return { allowed: true };
+    }
+
+    return { allowed: false, reason: "domain_not_in_list" };
+  }
+
+  /**
+   * Get the allowed domains from a license token
+   * Returns undefined if no domain restrictions, empty array if no domains allowed
+   */
+  public async getAllowedDomains(token: string): Promise<string[] | undefined> {
+    const result = await this.validate(token);
+    if (!result.valid) {
+      return undefined;
+    }
+    return result.license.allowedDomains;
   }
 
   /**
