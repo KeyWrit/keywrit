@@ -1,5 +1,8 @@
-// Main validator class
-export { LicenseValidator } from "./validator.ts";
+// Main validator classes
+// LicenseValidator is exported as the main entry point with static factory methods
+export { LicenseValidatorUnbound as LicenseValidator } from "./validator-unbound.ts";
+export { LicenseValidatorUnbound } from "./validator-unbound.ts";
+export { LicenseValidatorBound } from "./validator-bound.ts";
 
 // Constants
 export {
@@ -39,7 +42,7 @@ export type {
 export { decode, decodePayload } from "./jwt/decode.ts";
 
 // One-shot validation function
-import { LicenseValidator } from "./validator.ts";
+import { LicenseValidatorUnbound } from "./validator-unbound.ts";
 import type { ValidatorConfig, ValidationResult } from "./types/index.ts";
 
 /**
@@ -47,17 +50,17 @@ import type { ValidatorConfig, ValidationResult } from "./types/index.ts";
  *
  * @example
  * ```typescript
- * const result = await validateLicense(token, {
+ * const result = await validateLicense('my-app', token, {
  *   publicKey: "d75a980182b10ab...",
- *   realm: "my-app"
  * });
  * ```
  */
 export async function validateLicense<T = Record<string, unknown>>(
+  realm: string,
   token: string,
   config: ValidatorConfig
 ): Promise<ValidationResult<T>> {
-  const validator = await LicenseValidator.create<T>(config);
+  const validator = await LicenseValidatorUnbound.create<T>(realm, config);
   return validator.validate(token);
 }
 
@@ -66,17 +69,17 @@ export async function validateLicense<T = Record<string, unknown>>(
  *
  * @example
  * ```typescript
- * const validate = await createValidator({
+ * const validate = await createValidator('my-app', {
  *   publicKey: "d75a980182b10ab...",
- *   realm: "my-app"
  * });
  *
  * const result = await validate(token);
  * ```
  */
 export async function createValidator<T = Record<string, unknown>>(
+  realm: string,
   config: ValidatorConfig
 ): Promise<(token: string) => Promise<ValidationResult<T>>> {
-  const validator = await LicenseValidator.create<T>(config);
+  const validator = await LicenseValidatorUnbound.create<T>(realm, config);
   return (token: string) => validator.validate(token);
 }

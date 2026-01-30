@@ -15,9 +15,8 @@ describe("revocation", () => {
         exp: futureTimestamp(3600),
       });
 
-      const validator = await LicenseValidator.create({
+      const validator = await LicenseValidator.create(TEST_REALM, {
         publicKey: publicKeyHex,
-        realm: TEST_REALM,
         revocation: {
           jti: ["revoked-token-123", "other-revoked"],
         },
@@ -39,9 +38,8 @@ describe("revocation", () => {
         exp: futureTimestamp(3600),
       });
 
-      const validator = await LicenseValidator.create({
+      const validator = await LicenseValidator.create(TEST_REALM, {
         publicKey: publicKeyHex,
-        realm: TEST_REALM,
         revocation: {
           sub: ["banned@example.com"],
         },
@@ -63,9 +61,8 @@ describe("revocation", () => {
         exp: futureTimestamp(3600),
       });
 
-      const validator = await LicenseValidator.create({
+      const validator = await LicenseValidator.create(TEST_REALM, {
         publicKey: publicKeyHex,
-        realm: TEST_REALM,
         revocation: {
           jti: ["other-token"],
           sub: ["other@example.com"],
@@ -83,9 +80,8 @@ describe("revocation", () => {
         exp: futureTimestamp(3600),
       });
 
-      const validator = await LicenseValidator.create({
+      const validator = await LicenseValidator.create(TEST_REALM, {
         publicKey: publicKeyHex,
-        realm: TEST_REALM,
         revocation: {},
       });
 
@@ -114,9 +110,8 @@ describe("revocation", () => {
           exp: futureTimestamp(3600),
         });
 
-        const validator = await LicenseValidator.create({
+        const validator = await LicenseValidator.create(TEST_REALM, {
           publicKey: publicKeyHex,
-          realm: TEST_REALM,
           revocationUrl: "https://example.com/revocation.json",
         });
 
@@ -149,9 +144,8 @@ describe("revocation", () => {
           exp: futureTimestamp(3600),
         });
 
-        const validator = await LicenseValidator.create({
+        const validator = await LicenseValidator.create(TEST_REALM, {
           publicKey: publicKeyHex,
-          realm: TEST_REALM,
           revocationUrl: "https://example.com/revocation.json",
         });
 
@@ -186,9 +180,8 @@ describe("revocation", () => {
           exp: futureTimestamp(3600),
         });
 
-        const validator = await LicenseValidator.create({
+        const validator = await LicenseValidator.create(TEST_REALM, {
           publicKeyUrl: "https://example.com/public-key",
-          realm: TEST_REALM,
           revocationUrl: "https://example.com/revocation.json",
         });
 
@@ -224,9 +217,8 @@ describe("revocation", () => {
           exp: futureTimestamp(3600),
         });
 
-        const validator = await LicenseValidator.create({
+        const validator = await LicenseValidator.create(TEST_REALM, {
           publicKeyUrl: "https://example.com/public-key",
-          realm: TEST_REALM,
           revocationUrl: "https://example.com/revocation.json",
         });
 
@@ -256,9 +248,8 @@ describe("revocation", () => {
           exp: futureTimestamp(3600),
         });
 
-        const validator = await LicenseValidator.create({
+        const validator = await LicenseValidator.create(TEST_REALM, {
           publicKeyUrl: "https://example.com/public-key",
-          realm: TEST_REALM,
           revocationUrl: "https://example.com/revocation.json",
         });
 
@@ -288,9 +279,8 @@ describe("revocation", () => {
           exp: futureTimestamp(3600),
         });
 
-        const validator = await LicenseValidator.create({
+        const validator = await LicenseValidator.create(TEST_REALM, {
           publicKeyUrl: "https://example.com/public-key",
-          realm: TEST_REALM,
           revocationUrl: "https://example.com/revocation.json",
         });
 
@@ -317,9 +307,8 @@ describe("revocation", () => {
           exp: futureTimestamp(3600),
         });
 
-        const validator = await LicenseValidator.create({
+        const validator = await LicenseValidator.create(TEST_REALM, {
           publicKeyUrl: "https://example.com/public-key",
-          realm: TEST_REALM,
         });
 
         const result = await validator.validate(token);

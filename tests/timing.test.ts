@@ -14,7 +14,7 @@ describe("timing validation", () => {
         exp: futureTimestamp(3600),
       });
 
-      const validator = await LicenseValidator.create({ publicKey: publicKeyHex, realm: TEST_REALM });
+      const validator = await LicenseValidator.create(TEST_REALM, { publicKey: publicKeyHex });
       const result = await validator.validate(token);
 
       expect(result.valid).toBe(true);
@@ -26,7 +26,7 @@ describe("timing validation", () => {
         exp: pastTimestamp(3600),
       });
 
-      const validator = await LicenseValidator.create({ publicKey: publicKeyHex, realm: TEST_REALM });
+      const validator = await LicenseValidator.create(TEST_REALM, { publicKey: publicKeyHex });
       const result = await validator.validate(token);
 
       expect(result.valid).toBe(false);
@@ -39,7 +39,7 @@ describe("timing validation", () => {
     test("requires expiration by default", async () => {
       const token = await createToken({ sub: "test" });
 
-      const validator = await LicenseValidator.create({ publicKey: publicKeyHex, realm: TEST_REALM });
+      const validator = await LicenseValidator.create(TEST_REALM, { publicKey: publicKeyHex });
       const result = await validator.validate(token);
 
       expect(result.valid).toBe(false);
@@ -51,9 +51,8 @@ describe("timing validation", () => {
     test("allows no expiration when configured", async () => {
       const token = await createToken({ sub: "test" });
 
-      const validator = await LicenseValidator.create({
+      const validator = await LicenseValidator.create(TEST_REALM, {
         publicKey: publicKeyHex,
-        realm: TEST_REALM,
         allowNoExpiration: true,
       });
       const result = await validator.validate(token);
@@ -70,7 +69,7 @@ describe("timing validation", () => {
         exp: futureTimestamp(3600), // 1 hour (within 7 day warning threshold)
       });
 
-      const validator = await LicenseValidator.create({ publicKey: publicKeyHex, realm: TEST_REALM });
+      const validator = await LicenseValidator.create(TEST_REALM, { publicKey: publicKeyHex });
       const result = await validator.validate(token);
 
       expect(result.valid).toBe(true);
@@ -88,7 +87,7 @@ describe("timing validation", () => {
         nbf: pastTimestamp(3600),
       });
 
-      const validator = await LicenseValidator.create({ publicKey: publicKeyHex, realm: TEST_REALM });
+      const validator = await LicenseValidator.create(TEST_REALM, { publicKey: publicKeyHex });
       const result = await validator.validate(token);
 
       expect(result.valid).toBe(true);
@@ -101,7 +100,7 @@ describe("timing validation", () => {
         nbf: futureTimestamp(3600),
       });
 
-      const validator = await LicenseValidator.create({ publicKey: publicKeyHex, realm: TEST_REALM });
+      const validator = await LicenseValidator.create(TEST_REALM, { publicKey: publicKeyHex });
       const result = await validator.validate(token);
 
       expect(result.valid).toBe(false);
@@ -119,9 +118,8 @@ describe("timing validation", () => {
         exp: pastTimestamp(30), // Expired 30 seconds ago
       });
 
-      const validator = await LicenseValidator.create({
+      const validator = await LicenseValidator.create(TEST_REALM, {
         publicKey: publicKeyHex,
-        realm: TEST_REALM,
         timing: { clockSkew: 60 },
       });
       const result = await validator.validate(token);
@@ -136,9 +134,8 @@ describe("timing validation", () => {
         nbf: futureTimestamp(30), // Valid in 30 seconds
       });
 
-      const validator = await LicenseValidator.create({
+      const validator = await LicenseValidator.create(TEST_REALM, {
         publicKey: publicKeyHex,
-        realm: TEST_REALM,
         timing: { clockSkew: 60 },
       });
       const result = await validator.validate(token);
@@ -152,9 +149,8 @@ describe("timing validation", () => {
         exp: pastTimestamp(120), // Expired 2 minutes ago
       });
 
-      const validator = await LicenseValidator.create({
+      const validator = await LicenseValidator.create(TEST_REALM, {
         publicKey: publicKeyHex,
-        realm: TEST_REALM,
         timing: { clockSkew: 60 },
       });
       const result = await validator.validate(token);
@@ -169,9 +165,8 @@ describe("timing validation", () => {
       const token = await createToken({ sub: "test", exp });
 
       // Token should be valid when "current time" is before expiration
-      const validator = await LicenseValidator.create({
+      const validator = await LicenseValidator.create(TEST_REALM, {
         publicKey: publicKeyHex,
-        realm: TEST_REALM,
         timing: { currentTime: exp - 3600 },
       });
       const result = await validator.validate(token);

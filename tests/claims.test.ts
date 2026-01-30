@@ -15,9 +15,8 @@ describe("claim matchers", () => {
         exp: futureTimestamp(3600),
       });
 
-      const validator = await LicenseValidator.create({
+      const validator = await LicenseValidator.create(TEST_REALM, {
         publicKey: publicKeyHex,
-        realm: TEST_REALM,
         requiredFlags: ["export", "api"],
       });
       const result = await validator.validate(token);
@@ -32,9 +31,8 @@ describe("claim matchers", () => {
         exp: futureTimestamp(3600),
       });
 
-      const validator = await LicenseValidator.create({
+      const validator = await LicenseValidator.create(TEST_REALM, {
         publicKey: publicKeyHex,
-        realm: TEST_REALM,
         requiredFlags: ["export", "api"],
       });
       const result = await validator.validate(token);
@@ -52,9 +50,8 @@ describe("claim matchers", () => {
         exp: futureTimestamp(3600),
       });
 
-      const validator = await LicenseValidator.create({
+      const validator = await LicenseValidator.create(TEST_REALM, {
         publicKey: publicKeyHex,
-        realm: TEST_REALM,
         requiredFlags: ["export"],
       });
       const result = await validator.validate(token);
@@ -74,9 +71,8 @@ describe("claim matchers", () => {
         exp: futureTimestamp(3600),
       });
 
-      const validator = await LicenseValidator.create({
+      const validator = await LicenseValidator.create(TEST_REALM, {
         publicKey: publicKeyHex,
-        realm: TEST_REALM,
         requiredKind: "pro",
       });
       const result = await validator.validate(token);
@@ -91,9 +87,8 @@ describe("claim matchers", () => {
         exp: futureTimestamp(3600),
       });
 
-      const validator = await LicenseValidator.create({
+      const validator = await LicenseValidator.create(TEST_REALM, {
         publicKey: publicKeyHex,
-        realm: TEST_REALM,
         requiredKind: "pro",
       });
       const result = await validator.validate(token);
@@ -112,9 +107,8 @@ describe("claim matchers", () => {
         exp: futureTimestamp(3600),
       });
 
-      const validator = await LicenseValidator.create({
+      const validator = await LicenseValidator.create(TEST_REALM, {
         publicKey: publicKeyHex,
-        realm: TEST_REALM,
         requiredKind: "pro",
       });
       const result = await validator.validate(token);
@@ -134,9 +128,8 @@ describe("claim matchers", () => {
         exp: futureTimestamp(3600),
       });
 
-      const validator = await LicenseValidator.create({
+      const validator = await LicenseValidator.create(TEST_REALM, {
         publicKey: publicKeyHex,
-        realm: TEST_REALM,
         requiredFeatures: ["maxUsers", "region"],
       });
       const result = await validator.validate(token);
@@ -151,9 +144,8 @@ describe("claim matchers", () => {
         exp: futureTimestamp(3600),
       });
 
-      const validator = await LicenseValidator.create({
+      const validator = await LicenseValidator.create(TEST_REALM, {
         publicKey: publicKeyHex,
-        realm: TEST_REALM,
         requiredFeatures: ["maxUsers", "region"],
       });
       const result = await validator.validate(token);
@@ -171,9 +163,8 @@ describe("claim matchers", () => {
         exp: futureTimestamp(3600),
       });
 
-      const validator = await LicenseValidator.create({
+      const validator = await LicenseValidator.create(TEST_REALM, {
         publicKey: publicKeyHex,
-        realm: TEST_REALM,
         requiredFeatures: ["maxUsers"],
       });
       const result = await validator.validate(token);

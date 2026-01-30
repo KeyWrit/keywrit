@@ -18,9 +18,8 @@ describe("public key from URL", () => {
     }) as typeof fetch;
 
     try {
-      const validator = await LicenseValidator.create({
+      const validator = await LicenseValidator.create(TEST_REALM, {
         publicKeyUrl: "https://example.com/public-key",
-        realm: TEST_REALM,
       });
 
       const token = await createToken({
@@ -42,9 +41,8 @@ describe("public key from URL", () => {
     }) as typeof fetch;
 
     try {
-      const validator = await LicenseValidator.create({
+      const validator = await LicenseValidator.create(TEST_REALM, {
         publicKeyUrl: "https://example.com/public-key",
-        realm: TEST_REALM,
       });
 
       const token = await createToken({
@@ -67,9 +65,8 @@ describe("public key from URL", () => {
 
     try {
       await expect(
-        LicenseValidator.create({
+        LicenseValidator.create(TEST_REALM, {
           publicKeyUrl: "https://example.com/missing-key",
-          realm: TEST_REALM,
         })
       ).rejects.toThrow("Failed to fetch public key");
     } finally {
@@ -84,9 +81,8 @@ describe("public key from URL", () => {
     }) as typeof fetch;
 
     try {
-      const validator = await LicenseValidator.create({
+      const validator = await LicenseValidator.create(TEST_REALM, {
         publicKeyUrl: "https://example.com/public-key",
-        realm: TEST_REALM,
         requiredFlags: ["premium"],
       });
 
