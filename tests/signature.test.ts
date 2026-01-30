@@ -5,7 +5,7 @@
 import { describe, test, expect } from "bun:test";
 import * as ed25519 from "@noble/ed25519";
 import { LicenseValidator } from "../src/index.ts";
-import { createToken, publicKeyHex, futureTimestamp, TEST_LIBRARY_ID } from "./helpers.ts";
+import { createToken, publicKeyHex, futureTimestamp, TEST_REALM } from "./helpers.ts";
 
 describe("signature verification", () => {
   test("validates correct signature", async () => {
@@ -14,7 +14,7 @@ describe("signature verification", () => {
       exp: futureTimestamp(3600),
     });
 
-    const validator = await LicenseValidator.create({ publicKey: publicKeyHex, libraryId: TEST_LIBRARY_ID });
+    const validator = await LicenseValidator.create({ publicKey: publicKeyHex, realm: TEST_REALM });
     const result = await validator.validate(token);
 
     expect(result.valid).toBe(true);
@@ -31,7 +31,7 @@ describe("signature verification", () => {
       { privateKey: otherPrivate }
     );
 
-    const validator = await LicenseValidator.create({ publicKey: publicKeyHex, libraryId: TEST_LIBRARY_ID });
+    const validator = await LicenseValidator.create({ publicKey: publicKeyHex, realm: TEST_REALM });
     const result = await validator.validate(token);
 
     expect(result.valid).toBe(false);
@@ -54,7 +54,7 @@ describe("signature verification", () => {
       .replace(/=/g, "");
     const tamperedToken = `${parts[0]}.${tamperedPayload}.${parts[2]}`;
 
-    const validator = await LicenseValidator.create({ publicKey: publicKeyHex, libraryId: TEST_LIBRARY_ID });
+    const validator = await LicenseValidator.create({ publicKey: publicKeyHex, realm: TEST_REALM });
     const result = await validator.validate(tamperedToken);
 
     expect(result.valid).toBe(false);
@@ -70,7 +70,7 @@ describe("signature verification", () => {
       { privateKey: otherPrivate }
     );
 
-    const validator = await LicenseValidator.create({ publicKey: publicKeyHex, libraryId: TEST_LIBRARY_ID });
+    const validator = await LicenseValidator.create({ publicKey: publicKeyHex, realm: TEST_REALM });
     const result = await validator.validate(token);
 
     expect(result.valid).toBe(false);

@@ -16,7 +16,7 @@ export interface InternalClaimValidationResult {
  */
 export function validateInternalClaims(
   payload: LicensePayload,
-  libraryId: string
+  realm: string
 ): InternalClaimValidationResult {
   const errors: ValidationError[] = [];
 
@@ -32,19 +32,19 @@ export function validateInternalClaims(
     });
   }
 
-  // Validate audience contains the library ID
+  // Validate audience contains the realm
   const actualAuds = payload.aud
     ? Array.isArray(payload.aud)
       ? payload.aud
       : [payload.aud]
     : [];
 
-  if (!actualAuds.includes(libraryId)) {
+  if (!actualAuds.includes(realm)) {
     errors.push({
       code: "INVALID_AUDIENCE",
-      message: `Token not authorized for this library: expected audience to include "${libraryId}", got [${actualAuds.join(", ") || "(none)"}]`,
+      message: `Token not authorized for this realm: expected audience to include "${realm}", got [${actualAuds.join(", ") || "(none)"}]`,
       details: {
-        expectedLibraryId: libraryId,
+        expectedRealm: realm,
         actualAudience: actualAuds,
       },
     });

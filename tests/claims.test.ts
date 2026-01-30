@@ -4,7 +4,7 @@
 
 import { describe, test, expect } from "bun:test";
 import { LicenseValidator } from "../src/index.ts";
-import { createToken, publicKeyHex, futureTimestamp, TEST_LIBRARY_ID } from "./helpers.ts";
+import { createToken, publicKeyHex, futureTimestamp, TEST_REALM } from "./helpers.ts";
 
 describe("claim matchers", () => {
   describe("required flags", () => {
@@ -17,7 +17,7 @@ describe("claim matchers", () => {
 
       const validator = await LicenseValidator.create({
         publicKey: publicKeyHex,
-        libraryId: TEST_LIBRARY_ID,
+        realm: TEST_REALM,
         requiredFlags: ["export", "api"],
       });
       const result = await validator.validate(token);
@@ -34,7 +34,7 @@ describe("claim matchers", () => {
 
       const validator = await LicenseValidator.create({
         publicKey: publicKeyHex,
-        libraryId: TEST_LIBRARY_ID,
+        realm: TEST_REALM,
         requiredFlags: ["export", "api"],
       });
       const result = await validator.validate(token);
@@ -54,7 +54,7 @@ describe("claim matchers", () => {
 
       const validator = await LicenseValidator.create({
         publicKey: publicKeyHex,
-        libraryId: TEST_LIBRARY_ID,
+        realm: TEST_REALM,
         requiredFlags: ["export"],
       });
       const result = await validator.validate(token);
@@ -76,7 +76,7 @@ describe("claim matchers", () => {
 
       const validator = await LicenseValidator.create({
         publicKey: publicKeyHex,
-        libraryId: TEST_LIBRARY_ID,
+        realm: TEST_REALM,
         requiredKind: "pro",
       });
       const result = await validator.validate(token);
@@ -93,7 +93,7 @@ describe("claim matchers", () => {
 
       const validator = await LicenseValidator.create({
         publicKey: publicKeyHex,
-        libraryId: TEST_LIBRARY_ID,
+        realm: TEST_REALM,
         requiredKind: "pro",
       });
       const result = await validator.validate(token);
@@ -114,7 +114,7 @@ describe("claim matchers", () => {
 
       const validator = await LicenseValidator.create({
         publicKey: publicKeyHex,
-        libraryId: TEST_LIBRARY_ID,
+        realm: TEST_REALM,
         requiredKind: "pro",
       });
       const result = await validator.validate(token);
@@ -136,7 +136,7 @@ describe("claim matchers", () => {
 
       const validator = await LicenseValidator.create({
         publicKey: publicKeyHex,
-        libraryId: TEST_LIBRARY_ID,
+        realm: TEST_REALM,
         requiredFeatures: ["maxUsers", "region"],
       });
       const result = await validator.validate(token);
@@ -153,7 +153,7 @@ describe("claim matchers", () => {
 
       const validator = await LicenseValidator.create({
         publicKey: publicKeyHex,
-        libraryId: TEST_LIBRARY_ID,
+        realm: TEST_REALM,
         requiredFeatures: ["maxUsers", "region"],
       });
       const result = await validator.validate(token);
@@ -173,7 +173,7 @@ describe("claim matchers", () => {
 
       const validator = await LicenseValidator.create({
         publicKey: publicKeyHex,
-        libraryId: TEST_LIBRARY_ID,
+        realm: TEST_REALM,
         requiredFeatures: ["maxUsers"],
       });
       const result = await validator.validate(token);

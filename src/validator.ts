@@ -60,7 +60,7 @@ export class LicenseValidator<T = Record<string, unknown>> {
   private readonly publicKey: Uint8Array;
   private readonly revocationUrl?: string;
   private readonly revocation?: RevocationList;
-  private readonly libraryId: string;
+  private readonly realm: string;
   private readonly requiredFlags?: string[];
   private readonly requiredKind?: string;
   private readonly requiredFeatures?: string[];
@@ -74,7 +74,7 @@ export class LicenseValidator<T = Record<string, unknown>> {
     this.publicKey = publicKey;
     this.revocationUrl = "revocationUrl" in config ? config.revocationUrl : undefined;
     this.revocation = "revocation" in config ? config.revocation : undefined;
-    this.libraryId = config.libraryId;
+    this.realm = config.realm;
     this.requiredFlags = config.requiredFlags;
     this.requiredKind = config.requiredKind;
     this.requiredFeatures = config.requiredFeatures;
@@ -181,7 +181,7 @@ export class LicenseValidator<T = Record<string, unknown>> {
     // Validate internal claims (iss and aud)
     const internalResult = validateInternalClaims(
       decoded.payload as LicensePayload,
-      this.libraryId
+      this.realm
     );
     allErrors.push(...internalResult.errors);
 

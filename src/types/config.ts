@@ -23,8 +23,8 @@ export interface RevocationList {
 
 /** Base validator configuration options */
 export interface ValidatorConfigBase {
-  /** Library identifier - must match the token's audience */
-  libraryId: string;
+  /** Realm identifier - must match the token's audience */
+  realm: string;
   /** Required flags that must be present in the flags array */
   requiredFlags?: string[];
   /** Required kind (exact match) */

@@ -13,7 +13,7 @@ export let publicKey: Uint8Array;
 export let publicKeyHex: string;
 
 // Default library ID for tests
-export const TEST_LIBRARY_ID = "test-app";
+export const TEST_REALM = "test-app";
 
 // Initialize keys before tests run
 beforeAll(async () => {
@@ -29,7 +29,7 @@ export interface CreateTokenOptions {
   privateKey?: Uint8Array;
   /** Override the header (use for testing invalid headers) */
   header?: Record<string, unknown>;
-  /** Set aud to a different value (default: TEST_LIBRARY_ID) */
+  /** Set aud to a different value (default: TEST_REALM) */
   aud?: string | string[];
   /** Set iss to a different value (default: KEYWRIT_ISSUER) */
   iss?: string;
@@ -39,7 +39,7 @@ export interface CreateTokenOptions {
 
 /**
  * Create a signed JWT for testing
- * By default includes iss: "keywrit", aud: TEST_LIBRARY_ID, kwv: 1
+ * By default includes iss: "keywrit", aud: TEST_REALM, kwv: 1
  */
 export async function createToken(
   payload: Record<string, unknown>,
@@ -55,7 +55,7 @@ export async function createToken(
   // Build payload with KeyWrit defaults
   const fullPayload = {
     iss: options?.iss ?? KEYWRIT_ISSUER,
-    aud: options?.aud ?? TEST_LIBRARY_ID,
+    aud: options?.aud ?? TEST_REALM,
     ...payload,
   };
 

@@ -4,7 +4,7 @@
 
 import { describe, test, expect } from "bun:test";
 import { LicenseValidator, validateLicense, createValidator } from "../src/index.ts";
-import { createToken, createRawToken, publicKey, publicKeyHex, futureTimestamp, TEST_LIBRARY_ID } from "./helpers.ts";
+import { createToken, createRawToken, publicKey, publicKeyHex, futureTimestamp, TEST_REALM } from "./helpers.ts";
 
 describe("LicenseValidator", () => {
   describe("getLicense", () => {
@@ -16,7 +16,7 @@ describe("LicenseValidator", () => {
         exp: futureTimestamp(3600),
       });
 
-      const validator = await LicenseValidator.create({ publicKey: publicKeyHex, libraryId: TEST_LIBRARY_ID });
+      const validator = await LicenseValidator.create({ publicKey: publicKeyHex, realm: TEST_REALM });
       const license = await validator.getLicense(token);
 
       expect(license).not.toBeNull();
@@ -26,7 +26,7 @@ describe("LicenseValidator", () => {
     });
 
     test("returns null for invalid token", async () => {
-      const validator = await LicenseValidator.create({ publicKey: publicKeyHex, libraryId: TEST_LIBRARY_ID });
+      const validator = await LicenseValidator.create({ publicKey: publicKeyHex, realm: TEST_REALM });
       const license = await validator.getLicense("invalid-token");
 
       expect(license).toBeNull();
@@ -38,7 +38,7 @@ describe("LicenseValidator", () => {
         exp: Math.floor(Date.now() / 1000) - 3600,
       });
 
-      const validator = await LicenseValidator.create({ publicKey: publicKeyHex, libraryId: TEST_LIBRARY_ID });
+      const validator = await LicenseValidator.create({ publicKey: publicKeyHex, realm: TEST_REALM });
       const license = await validator.getLicense(token);
 
       expect(license).toBeNull();
@@ -55,7 +55,7 @@ describe("LicenseValidator", () => {
 
       const validator = await LicenseValidator.create({
         publicKey: publicKeyHex,
-        libraryId: TEST_LIBRARY_ID,
+        realm: TEST_REALM,
         requiredFlags: ["flag1", "flag2"],
       });
       const result = await validator.validate(token);
@@ -80,7 +80,7 @@ describe("utility functions", () => {
         exp: futureTimestamp(3600),
       });
 
-      const result = await validateLicense(token, { publicKey: publicKeyHex, libraryId: TEST_LIBRARY_ID });
+      const result = await validateLicense(token, { publicKey: publicKeyHex, realm: TEST_REALM });
       expect(result.valid).toBe(true);
     });
 
@@ -92,7 +92,7 @@ describe("utility functions", () => {
 
       const result = await validateLicense(token, {
         publicKey: publicKeyHex,
-        libraryId: TEST_LIBRARY_ID,
+        realm: TEST_REALM,
         timing: { clockSkew: 30 },
       });
       expect(result.valid).toBe(true);
@@ -101,7 +101,7 @@ describe("utility functions", () => {
 
   describe("createValidator", () => {
     test("returns reusable validation function", async () => {
-      const validate = await createValidator({ publicKey: publicKeyHex, libraryId: TEST_LIBRARY_ID });
+      const validate = await createValidator({ publicKey: publicKeyHex, realm: TEST_REALM });
 
       const token1 = await createToken({ sub: "user1", exp: futureTimestamp(3600) });
       const token2 = await createToken({ sub: "user2", exp: futureTimestamp(3600) });
@@ -126,7 +126,7 @@ describe("public key formats", () => {
       exp: futureTimestamp(3600),
     });
 
-    const validator = await LicenseValidator.create({ publicKey, libraryId: TEST_LIBRARY_ID });
+    const validator = await LicenseValidator.create({ publicKey, realm: TEST_REALM });
     const result = await validator.validate(token);
 
     expect(result.valid).toBe(true);
@@ -138,7 +138,7 @@ describe("public key formats", () => {
       exp: futureTimestamp(3600),
     });
 
-    const validator = await LicenseValidator.create({ publicKey: publicKeyHex, libraryId: TEST_LIBRARY_ID });
+    const validator = await LicenseValidator.create({ publicKey: publicKeyHex, realm: TEST_REALM });
     const result = await validator.validate(token);
 
     expect(result.valid).toBe(true);
@@ -153,7 +153,7 @@ describe("public key formats", () => {
     // Convert to base64
     const base64 = btoa(String.fromCharCode(...publicKey));
 
-    const validator = await LicenseValidator.create({ publicKey: base64, libraryId: TEST_LIBRARY_ID });
+    const validator = await LicenseValidator.create({ publicKey: base64, realm: TEST_REALM });
     const result = await validator.validate(token);
 
     expect(result.valid).toBe(true);
@@ -161,13 +161,13 @@ describe("public key formats", () => {
 
   test("throws for invalid key length", async () => {
     await expect(
-      LicenseValidator.create({ publicKey: new Uint8Array(16), libraryId: TEST_LIBRARY_ID })
+      LicenseValidator.create({ publicKey: new Uint8Array(16), realm: TEST_REALM })
     ).rejects.toThrow();
   });
 
   test("throws for invalid key format", async () => {
     await expect(
-      LicenseValidator.create({ publicKey: "not-a-valid-key", libraryId: TEST_LIBRARY_ID })
+      LicenseValidator.create({ publicKey: "not-a-valid-key", realm: TEST_REALM })
     ).rejects.toThrow();
   });
 });
@@ -180,7 +180,7 @@ describe("internal claim validation", () => {
         exp: futureTimestamp(3600),
       }, { iss: "wrong-issuer" });
 
-      const validator = await LicenseValidator.create({ publicKey: publicKeyHex, libraryId: TEST_LIBRARY_ID });
+      const validator = await LicenseValidator.create({ publicKey: publicKeyHex, realm: TEST_REALM });
       const result = await validator.validate(token);
 
       expect(result.valid).toBe(false);
@@ -193,10 +193,10 @@ describe("internal claim validation", () => {
       // Use raw token to skip iss default
       const token = await createRawToken(
         { alg: "EdDSA", typ: "JWT", kwv: 1 },
-        { sub: "test", aud: TEST_LIBRARY_ID, exp: futureTimestamp(3600) }
+        { sub: "test", aud: TEST_REALM, exp: futureTimestamp(3600) }
       );
 
-      const validator = await LicenseValidator.create({ publicKey: publicKeyHex, libraryId: TEST_LIBRARY_ID });
+      const validator = await LicenseValidator.create({ publicKey: publicKeyHex, realm: TEST_REALM });
       const result = await validator.validate(token);
 
       expect(result.valid).toBe(false);
@@ -213,7 +213,7 @@ describe("internal claim validation", () => {
         exp: futureTimestamp(3600),
       }, { aud: "other-app" });
 
-      const validator = await LicenseValidator.create({ publicKey: publicKeyHex, libraryId: TEST_LIBRARY_ID });
+      const validator = await LicenseValidator.create({ publicKey: publicKeyHex, realm: TEST_REALM });
       const result = await validator.validate(token);
 
       expect(result.valid).toBe(false);
@@ -226,9 +226,9 @@ describe("internal claim validation", () => {
       const token = await createToken({
         sub: "test",
         exp: futureTimestamp(3600),
-      }, { aud: ["other-app", TEST_LIBRARY_ID, "another-app"] });
+      }, { aud: ["other-app", TEST_REALM, "another-app"] });
 
-      const validator = await LicenseValidator.create({ publicKey: publicKeyHex, libraryId: TEST_LIBRARY_ID });
+      const validator = await LicenseValidator.create({ publicKey: publicKeyHex, realm: TEST_REALM });
       const result = await validator.validate(token);
 
       expect(result.valid).toBe(true);
@@ -241,7 +241,7 @@ describe("internal claim validation", () => {
         { iss: "keywrit", sub: "test", exp: futureTimestamp(3600) }
       );
 
-      const validator = await LicenseValidator.create({ publicKey: publicKeyHex, libraryId: TEST_LIBRARY_ID });
+      const validator = await LicenseValidator.create({ publicKey: publicKeyHex, realm: TEST_REALM });
       const result = await validator.validate(token);
 
       expect(result.valid).toBe(false);
@@ -255,10 +255,10 @@ describe("internal claim validation", () => {
     test("rejects token without kwv header", async () => {
       const token = await createRawToken(
         { alg: "EdDSA", typ: "JWT" },
-        { iss: "keywrit", aud: TEST_LIBRARY_ID, sub: "test", exp: futureTimestamp(3600) }
+        { iss: "keywrit", aud: TEST_REALM, sub: "test", exp: futureTimestamp(3600) }
       );
 
-      const validator = await LicenseValidator.create({ publicKey: publicKeyHex, libraryId: TEST_LIBRARY_ID });
+      const validator = await LicenseValidator.create({ publicKey: publicKeyHex, realm: TEST_REALM });
       const result = await validator.validate(token);
 
       expect(result.valid).toBe(false);
@@ -271,10 +271,10 @@ describe("internal claim validation", () => {
     test("rejects token with unsupported version", async () => {
       const token = await createRawToken(
         { alg: "EdDSA", typ: "JWT", kwv: 999 },
-        { iss: "keywrit", aud: TEST_LIBRARY_ID, sub: "test", exp: futureTimestamp(3600) }
+        { iss: "keywrit", aud: TEST_REALM, sub: "test", exp: futureTimestamp(3600) }
       );
 
-      const validator = await LicenseValidator.create({ publicKey: publicKeyHex, libraryId: TEST_LIBRARY_ID });
+      const validator = await LicenseValidator.create({ publicKey: publicKeyHex, realm: TEST_REALM });
       const result = await validator.validate(token);
 
       expect(result.valid).toBe(false);

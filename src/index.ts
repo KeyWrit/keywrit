@@ -49,7 +49,7 @@ import type { ValidatorConfig, ValidationResult } from "./types/index.ts";
  * ```typescript
  * const result = await validateLicense(token, {
  *   publicKey: "d75a980182b10ab...",
- *   libraryId: "my-app"
+ *   realm: "my-app"
  * });
  * ```
  */
@@ -68,7 +68,7 @@ export async function validateLicense<T = Record<string, unknown>>(
  * ```typescript
  * const validate = await createValidator({
  *   publicKey: "d75a980182b10ab...",
- *   libraryId: "my-app"
+ *   realm: "my-app"
  * });
  *
  * const result = await validate(token);

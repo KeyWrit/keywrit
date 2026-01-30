@@ -4,7 +4,7 @@
 
 import { describe, test, expect, mock } from "bun:test";
 import { LicenseValidator } from "../src/index.ts";
-import { createToken, publicKeyHex, futureTimestamp, TEST_LIBRARY_ID } from "./helpers.ts";
+import { createToken, publicKeyHex, futureTimestamp, TEST_REALM } from "./helpers.ts";
 
 describe("public key from URL", () => {
   test("creates validator from URL", async () => {
@@ -20,7 +20,7 @@ describe("public key from URL", () => {
     try {
       const validator = await LicenseValidator.create({
         publicKeyUrl: "https://example.com/public-key",
-        libraryId: TEST_LIBRARY_ID,
+        realm: TEST_REALM,
       });
 
       const token = await createToken({
@@ -44,7 +44,7 @@ describe("public key from URL", () => {
     try {
       const validator = await LicenseValidator.create({
         publicKeyUrl: "https://example.com/public-key",
-        libraryId: TEST_LIBRARY_ID,
+        realm: TEST_REALM,
       });
 
       const token = await createToken({
@@ -69,7 +69,7 @@ describe("public key from URL", () => {
       await expect(
         LicenseValidator.create({
           publicKeyUrl: "https://example.com/missing-key",
-          libraryId: TEST_LIBRARY_ID,
+          realm: TEST_REALM,
         })
       ).rejects.toThrow("Failed to fetch public key");
     } finally {
@@ -86,7 +86,7 @@ describe("public key from URL", () => {
     try {
       const validator = await LicenseValidator.create({
         publicKeyUrl: "https://example.com/public-key",
-        libraryId: TEST_LIBRARY_ID,
+        realm: TEST_REALM,
         requiredFlags: ["premium"],
       });
 

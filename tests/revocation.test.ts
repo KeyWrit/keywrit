@@ -4,7 +4,7 @@
 
 import { describe, test, expect, mock } from "bun:test";
 import { LicenseValidator } from "../src/index.ts";
-import { createToken, publicKeyHex, futureTimestamp, TEST_LIBRARY_ID } from "./helpers.ts";
+import { createToken, publicKeyHex, futureTimestamp, TEST_REALM } from "./helpers.ts";
 
 describe("revocation", () => {
   describe("static revocation list", () => {
@@ -17,7 +17,7 @@ describe("revocation", () => {
 
       const validator = await LicenseValidator.create({
         publicKey: publicKeyHex,
-        libraryId: TEST_LIBRARY_ID,
+        realm: TEST_REALM,
         revocation: {
           jti: ["revoked-token-123", "other-revoked"],
         },
@@ -41,7 +41,7 @@ describe("revocation", () => {
 
       const validator = await LicenseValidator.create({
         publicKey: publicKeyHex,
-        libraryId: TEST_LIBRARY_ID,
+        realm: TEST_REALM,
         revocation: {
           sub: ["banned@example.com"],
         },
@@ -65,7 +65,7 @@ describe("revocation", () => {
 
       const validator = await LicenseValidator.create({
         publicKey: publicKeyHex,
-        libraryId: TEST_LIBRARY_ID,
+        realm: TEST_REALM,
         revocation: {
           jti: ["other-token"],
           sub: ["other@example.com"],
@@ -85,7 +85,7 @@ describe("revocation", () => {
 
       const validator = await LicenseValidator.create({
         publicKey: publicKeyHex,
-        libraryId: TEST_LIBRARY_ID,
+        realm: TEST_REALM,
         revocation: {},
       });
 
@@ -116,7 +116,7 @@ describe("revocation", () => {
 
         const validator = await LicenseValidator.create({
           publicKey: publicKeyHex,
-          libraryId: TEST_LIBRARY_ID,
+          realm: TEST_REALM,
           revocationUrl: "https://example.com/revocation.json",
         });
 
@@ -151,7 +151,7 @@ describe("revocation", () => {
 
         const validator = await LicenseValidator.create({
           publicKey: publicKeyHex,
-          libraryId: TEST_LIBRARY_ID,
+          realm: TEST_REALM,
           revocationUrl: "https://example.com/revocation.json",
         });
 
@@ -188,7 +188,7 @@ describe("revocation", () => {
 
         const validator = await LicenseValidator.create({
           publicKeyUrl: "https://example.com/public-key",
-          libraryId: TEST_LIBRARY_ID,
+          realm: TEST_REALM,
           revocationUrl: "https://example.com/revocation.json",
         });
 
@@ -226,7 +226,7 @@ describe("revocation", () => {
 
         const validator = await LicenseValidator.create({
           publicKeyUrl: "https://example.com/public-key",
-          libraryId: TEST_LIBRARY_ID,
+          realm: TEST_REALM,
           revocationUrl: "https://example.com/revocation.json",
         });
 
@@ -258,7 +258,7 @@ describe("revocation", () => {
 
         const validator = await LicenseValidator.create({
           publicKeyUrl: "https://example.com/public-key",
-          libraryId: TEST_LIBRARY_ID,
+          realm: TEST_REALM,
           revocationUrl: "https://example.com/revocation.json",
         });
 
@@ -290,7 +290,7 @@ describe("revocation", () => {
 
         const validator = await LicenseValidator.create({
           publicKeyUrl: "https://example.com/public-key",
-          libraryId: TEST_LIBRARY_ID,
+          realm: TEST_REALM,
           revocationUrl: "https://example.com/revocation.json",
         });
 
@@ -319,7 +319,7 @@ describe("revocation", () => {
 
         const validator = await LicenseValidator.create({
           publicKeyUrl: "https://example.com/public-key",
-          libraryId: TEST_LIBRARY_ID,
+          realm: TEST_REALM,
         });
 
         const result = await validator.validate(token);

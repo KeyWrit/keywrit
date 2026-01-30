@@ -4,7 +4,7 @@
 
 import { describe, test, expect } from "bun:test";
 import { decode, decodePayload } from "../src/index.ts";
-import { createToken, createRawToken, TEST_LIBRARY_ID } from "./helpers.ts";
+import { createToken, createRawToken, TEST_REALM } from "./helpers.ts";
 
 describe("decode", () => {
   test("decodes valid token", async () => {
@@ -17,7 +17,7 @@ describe("decode", () => {
     expect(decoded?.header.kwv).toBe(1);
     expect(decoded?.payload.sub).toBe("user@example.com");
     expect(decoded?.payload.iss).toBe("keywrit");
-    expect(decoded?.payload.aud).toBe(TEST_LIBRARY_ID);
+    expect(decoded?.payload.aud).toBe(TEST_REALM);
   });
 
   test("returns null for malformed token", () => {
