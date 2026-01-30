@@ -4,7 +4,7 @@
 
 import { describe, test, expect } from "bun:test";
 import { decode, decodePayload } from "../src/index.ts";
-import { createToken } from "./helpers.ts";
+import { createToken, createRawToken, TEST_LIBRARY_ID } from "./helpers.ts";
 
 describe("decode", () => {
   test("decodes valid token", async () => {
@@ -14,7 +14,10 @@ describe("decode", () => {
     expect(decoded).not.toBeNull();
     expect(decoded?.header.alg).toBe("EdDSA");
     expect(decoded?.header.typ).toBe("JWT");
+    expect(decoded?.header.kwv).toBe(1);
     expect(decoded?.payload.sub).toBe("user@example.com");
+    expect(decoded?.payload.iss).toBe("keywrit");
+    expect(decoded?.payload.aud).toBe(TEST_LIBRARY_ID);
   });
 
   test("returns null for malformed token", () => {
@@ -31,6 +34,22 @@ describe("decode", () => {
   test("returns null for invalid base64", () => {
     expect(decode("!!!.@@@.###")).toBeNull();
   });
+
+  test("returns null for token without kwv", async () => {
+    const token = await createRawToken(
+      { alg: "EdDSA", typ: "JWT" }, // no kwv
+      { sub: "test" }
+    );
+    expect(decode(token)).toBeNull();
+  });
+
+  test("returns null for token with unsupported kwv", async () => {
+    const token = await createRawToken(
+      { alg: "EdDSA", typ: "JWT", kwv: 999 },
+      { sub: "test" }
+    );
+    expect(decode(token)).toBeNull();
+  });
 });
 
 describe("decodePayload", () => {
@@ -40,6 +59,7 @@ describe("decodePayload", () => {
 
     expect(payload?.sub).toBe("test");
     expect(payload?.kind).toBe("pro");
+    expect(payload?.iss).toBe("keywrit");
   });
 
   test("returns null for invalid token", () => {
@@ -50,16 +70,14 @@ describe("decodePayload", () => {
   test("extracts complex payload", async () => {
     const token = await createToken({
       sub: "user@example.com",
-      iss: "mycompany",
-      aud: ["app1", "app2"],
       flags: ["export", "import"],
       kind: "enterprise",
       features: { region: "us-west" },
-    });
+    }, { aud: ["app1", "app2"] });
     const payload = decodePayload(token);
 
     expect(payload?.sub).toBe("user@example.com");
-    expect(payload?.iss).toBe("mycompany");
+    expect(payload?.iss).toBe("keywrit");
     expect(payload?.aud).toEqual(["app1", "app2"]);
     expect(payload?.flags).toEqual(["export", "import"]);
     expect(payload?.kind).toBe("enterprise");

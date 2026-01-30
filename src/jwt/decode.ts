@@ -4,6 +4,7 @@
 
 import type { DecodedJWT, JWTHeader, LicensePayload } from "../types/index.ts";
 import { decode as base64urlDecode, decodeString } from "../utils/base64url.ts";
+import { SUPPORTED_VERSIONS } from "../constants.ts";
 
 /** Validation result for decoding */
 export type DecodeResult<T> =
@@ -52,6 +53,20 @@ export function decodeJWT<T = Record<string, unknown>>(
     return {
       success: false,
       error: `Invalid type: expected JWT, got ${header.typ}`,
+    };
+  }
+
+  // Validate KeyWrit version
+  if (header.kwv === undefined) {
+    return {
+      success: false,
+      error: "Missing KeyWrit version (kwv) in header",
+    };
+  }
+  if (!SUPPORTED_VERSIONS.includes(header.kwv)) {
+    return {
+      success: false,
+      error: `Unsupported KeyWrit version: ${header.kwv}. Supported versions: ${SUPPORTED_VERSIONS.join(", ")}`,
     };
   }
 

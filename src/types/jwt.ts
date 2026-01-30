@@ -6,6 +6,8 @@
 export interface JWTHeader {
   alg: "EdDSA";
   typ: "JWT";
+  /** KeyWrit version */
+  kwv: number;
 }
 
 /** Standard JWT claims */

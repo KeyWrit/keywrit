@@ -1,12 +1,18 @@
 // Main validator class
 export { LicenseValidator } from "./validator.ts";
 
+// Constants
+export {
+  KEYWRIT_ISSUER,
+  KEYWRIT_VERSION,
+  SUPPORTED_VERSIONS,
+} from "./constants.ts";
+
 // Types
 export type {
   // Configuration
   PublicKeyInput,
   ValidatorConfig,
-  ClaimMatchers,
   TimingOptions,
   RevocationList,
   // JWT structure
@@ -42,7 +48,7 @@ import type { ValidatorConfig, ValidationResult } from "./types/index.ts";
  * ```typescript
  * const result = await validateLicense(token, {
  *   publicKey: "d75a980182b10ab...",
- *   claims: { iss: "mycompany" }
+ *   libraryId: "my-app"
  * });
  * ```
  */
@@ -61,7 +67,7 @@ export async function validateLicense<T = Record<string, unknown>>(
  * ```typescript
  * const validate = await createValidator({
  *   publicKey: "d75a980182b10ab...",
- *   claims: { iss: "mycompany" }
+ *   libraryId: "my-app"
  * });
  *
  * const result = await validate(token);

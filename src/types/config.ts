@@ -5,22 +5,6 @@
 /** Accepted formats for Ed25519 public keys */
 export type PublicKeyInput = string | Uint8Array;
 
-/** Claim matchers for validation */
-export interface ClaimMatchers {
-  /** Expected issuer */
-  iss?: string;
-  /** Expected audience (can match any in array) */
-  aud?: string | string[];
-  /** Expected subject */
-  sub?: string;
-  /** Required flags that must be present in the flags array */
-  requiredFlags?: string[];
-  /** Required kind (exact match) */
-  requiredKind?: string;
-  /** Required feature keys that must be present in the features map */
-  requiredFeatures?: string[];
-}
-
 /** Timing options for validation */
 export interface TimingOptions {
   /** Clock skew tolerance in seconds (default: 60) */
@@ -39,8 +23,14 @@ export interface RevocationList {
 
 /** Base validator configuration options */
 export interface ValidatorConfigBase {
-  /** Claim matchers for validation */
-  claims?: ClaimMatchers;
+  /** Library identifier - must match the token's audience */
+  libraryId: string;
+  /** Required flags that must be present in the flags array */
+  requiredFlags?: string[];
+  /** Required kind (exact match) */
+  requiredKind?: string;
+  /** Required feature keys that must be present in the features map */
+  requiredFeatures?: string[];
   /** Timing options */
   timing?: TimingOptions;
   /** Allow tokens without expiration (default: false) */

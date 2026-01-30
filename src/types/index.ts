@@ -14,7 +14,6 @@ export type {
 // Configuration types
 export type {
   PublicKeyInput,
-  ClaimMatchers,
   TimingOptions,
   RevocationList,
   ValidatorConfig,

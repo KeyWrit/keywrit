@@ -1,174 +1,12 @@
 /**
- * Tests for claim matchers
+ * Tests for claim matchers (flags, kind, features)
  */
 
 import { describe, test, expect } from "bun:test";
 import { LicenseValidator } from "../src/index.ts";
-import { createToken, publicKeyHex, futureTimestamp } from "./helpers.ts";
+import { createToken, publicKeyHex, futureTimestamp, TEST_LIBRARY_ID } from "./helpers.ts";
 
 describe("claim matchers", () => {
-  describe("issuer (iss)", () => {
-    test("validates matching issuer", async () => {
-      const token = await createToken({
-        iss: "mycompany",
-        sub: "test",
-        exp: futureTimestamp(3600),
-      });
-
-      const validator = await LicenseValidator.create({
-        publicKey: publicKeyHex,
-        claims: { iss: "mycompany" },
-      });
-      const result = await validator.validate(token);
-
-      expect(result.valid).toBe(true);
-    });
-
-    test("rejects wrong issuer", async () => {
-      const token = await createToken({
-        iss: "wrongcompany",
-        sub: "test",
-        exp: futureTimestamp(3600),
-      });
-
-      const validator = await LicenseValidator.create({
-        publicKey: publicKeyHex,
-        claims: { iss: "mycompany" },
-      });
-      const result = await validator.validate(token);
-
-      expect(result.valid).toBe(false);
-      if (!result.valid) {
-        expect(result.error.code).toBe("CLAIM_MISMATCH");
-        expect(result.error.details?.claim).toBe("iss");
-      }
-    });
-
-    test("rejects missing issuer when required", async () => {
-      const token = await createToken({
-        sub: "test",
-        exp: futureTimestamp(3600),
-      });
-
-      const validator = await LicenseValidator.create({
-        publicKey: publicKeyHex,
-        claims: { iss: "mycompany" },
-      });
-      const result = await validator.validate(token);
-
-      expect(result.valid).toBe(false);
-      if (!result.valid) {
-        expect(result.error.code).toBe("CLAIM_MISMATCH");
-      }
-    });
-  });
-
-  describe("subject (sub)", () => {
-    test("validates matching subject", async () => {
-      const token = await createToken({
-        sub: "user@example.com",
-        exp: futureTimestamp(3600),
-      });
-
-      const validator = await LicenseValidator.create({
-        publicKey: publicKeyHex,
-        claims: { sub: "user@example.com" },
-      });
-      const result = await validator.validate(token);
-
-      expect(result.valid).toBe(true);
-    });
-
-    test("rejects wrong subject", async () => {
-      const token = await createToken({
-        sub: "other@example.com",
-        exp: futureTimestamp(3600),
-      });
-
-      const validator = await LicenseValidator.create({
-        publicKey: publicKeyHex,
-        claims: { sub: "user@example.com" },
-      });
-      const result = await validator.validate(token);
-
-      expect(result.valid).toBe(false);
-      if (!result.valid) {
-        expect(result.error.code).toBe("CLAIM_MISMATCH");
-        expect(result.error.details?.claim).toBe("sub");
-      }
-    });
-  });
-
-  describe("audience (aud)", () => {
-    test("validates single audience", async () => {
-      const token = await createToken({
-        aud: "myapp",
-        sub: "test",
-        exp: futureTimestamp(3600),
-      });
-
-      const validator = await LicenseValidator.create({
-        publicKey: publicKeyHex,
-        claims: { aud: "myapp" },
-      });
-      const result = await validator.validate(token);
-
-      expect(result.valid).toBe(true);
-    });
-
-    test("validates audience array (token has array)", async () => {
-      const token = await createToken({
-        aud: ["app1", "app2", "app3"],
-        sub: "test",
-        exp: futureTimestamp(3600),
-      });
-
-      const validator = await LicenseValidator.create({
-        publicKey: publicKeyHex,
-        claims: { aud: "app2" },
-      });
-      const result = await validator.validate(token);
-
-      expect(result.valid).toBe(true);
-    });
-
-    test("validates audience array (matcher has array)", async () => {
-      const token = await createToken({
-        aud: "myapp",
-        sub: "test",
-        exp: futureTimestamp(3600),
-      });
-
-      const validator = await LicenseValidator.create({
-        publicKey: publicKeyHex,
-        claims: { aud: ["myapp", "otherapp"] },
-      });
-      const result = await validator.validate(token);
-
-      expect(result.valid).toBe(true);
-    });
-
-    test("rejects wrong audience", async () => {
-      const token = await createToken({
-        aud: "wrongapp",
-        sub: "test",
-        exp: futureTimestamp(3600),
-      });
-
-      const validator = await LicenseValidator.create({
-        publicKey: publicKeyHex,
-        claims: { aud: "myapp" },
-      });
-      const result = await validator.validate(token);
-
-      expect(result.valid).toBe(false);
-      if (!result.valid) {
-        expect(result.error.code).toBe("CLAIM_MISMATCH");
-        expect(result.error.details?.claim).toBe("aud");
-      }
-    });
-  });
-
   describe("required flags", () => {
     test("validates when all required flags present", async () => {
       const token = await createToken({
@@ -179,7 +17,8 @@ describe("claim matchers", () => {
 
       const validator = await LicenseValidator.create({
         publicKey: publicKeyHex,
-        claims: { requiredFlags: ["export", "api"] },
+        libraryId: TEST_LIBRARY_ID,
+        requiredFlags: ["export", "api"],
       });
       const result = await validator.validate(token);
 
@@ -195,7 +34,8 @@ describe("claim matchers", () => {
 
       const validator = await LicenseValidator.create({
         publicKey: publicKeyHex,
-        claims: { requiredFlags: ["export", "api"] },
+        libraryId: TEST_LIBRARY_ID,
+        requiredFlags: ["export", "api"],
       });
       const result = await validator.validate(token);
 
@@ -214,7 +54,8 @@ describe("claim matchers", () => {
 
       const validator = await LicenseValidator.create({
         publicKey: publicKeyHex,
-        claims: { requiredFlags: ["export"] },
+        libraryId: TEST_LIBRARY_ID,
+        requiredFlags: ["export"],
       });
       const result = await validator.validate(token);
 
@@ -235,7 +76,8 @@ describe("claim matchers", () => {
 
       const validator = await LicenseValidator.create({
         publicKey: publicKeyHex,
-        claims: { requiredKind: "pro" },
+        libraryId: TEST_LIBRARY_ID,
+        requiredKind: "pro",
       });
       const result = await validator.validate(token);
 
@@ -251,7 +93,8 @@ describe("claim matchers", () => {
 
       const validator = await LicenseValidator.create({
         publicKey: publicKeyHex,
-        claims: { requiredKind: "pro" },
+        libraryId: TEST_LIBRARY_ID,
+        requiredKind: "pro",
       });
       const result = await validator.validate(token);
 
@@ -271,7 +114,8 @@ describe("claim matchers", () => {
 
       const validator = await LicenseValidator.create({
         publicKey: publicKeyHex,
-        claims: { requiredKind: "pro" },
+        libraryId: TEST_LIBRARY_ID,
+        requiredKind: "pro",
       });
       const result = await validator.validate(token);
 
@@ -292,7 +136,8 @@ describe("claim matchers", () => {
 
       const validator = await LicenseValidator.create({
         publicKey: publicKeyHex,
-        claims: { requiredFeatures: ["maxUsers", "region"] },
+        libraryId: TEST_LIBRARY_ID,
+        requiredFeatures: ["maxUsers", "region"],
       });
       const result = await validator.validate(token);
 
@@ -308,7 +153,8 @@ describe("claim matchers", () => {
 
       const validator = await LicenseValidator.create({
         publicKey: publicKeyHex,
-        claims: { requiredFeatures: ["maxUsers", "region"] },
+        libraryId: TEST_LIBRARY_ID,
+        requiredFeatures: ["maxUsers", "region"],
       });
       const result = await validator.validate(token);
 
@@ -327,7 +173,8 @@ describe("claim matchers", () => {
 
       const validator = await LicenseValidator.create({
         publicKey: publicKeyHex,
-        claims: { requiredFeatures: ["maxUsers"] },
+        libraryId: TEST_LIBRARY_ID,
+        requiredFeatures: ["maxUsers"],
       });
       const result = await validator.validate(token);
 

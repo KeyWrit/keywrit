@@ -17,7 +17,10 @@ export type ValidationErrorCode =
   | "MISSING_REQUIRED_FLAG"
   | "MISSING_REQUIRED_FEATURE"
   | "KIND_MISMATCH"
-  | "EXPIRATION_REQUIRED";
+  | "EXPIRATION_REQUIRED"
+  | "INVALID_ISSUER"
+  | "INVALID_AUDIENCE"
+  | "UNSUPPORTED_VERSION";
 
 /** Validation error with code and details */
 export interface ValidationError {

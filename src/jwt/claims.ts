@@ -3,7 +3,6 @@
  */
 
 import type {
-  ClaimMatchers,
   LicensePayload,
   TimingOptions,
   ValidationError,
@@ -22,6 +21,13 @@ import {
 export interface ClaimValidationResult {
   errors: ValidationError[];
   warnings: ValidationWarning[];
+}
+
+/** Options for claim matcher validation */
+export interface ClaimMatcherOptions {
+  requiredFlags?: string[];
+  requiredKind?: string;
+  requiredFeatures?: string[];
 }
 
 /**
@@ -103,58 +109,19 @@ export function validateTimingClaims(
 }
 
 /**
- * Validate claim matchers
+ * Validate claim matchers (flags, kind, features)
  */
 export function validateClaimMatchers(
   payload: LicensePayload,
-  matchers: ClaimMatchers
+  options: ClaimMatcherOptions
 ): ClaimValidationResult {
   const errors: ValidationError[] = [];
   const warnings: ValidationWarning[] = [];
 
-  // Check issuer
-  if (matchers.iss !== undefined && payload.iss !== matchers.iss) {
-    errors.push({
-      code: "CLAIM_MISMATCH",
-      message: `Issuer mismatch: expected "${matchers.iss}", got "${payload.iss ?? "(none)"}"`,
-      details: { claim: "iss", expected: matchers.iss, actual: payload.iss },
-    });
-  }
-
-  // Check subject
-  if (matchers.sub !== undefined && payload.sub !== matchers.sub) {
-    errors.push({
-      code: "CLAIM_MISMATCH",
-      message: `Subject mismatch: expected "${matchers.sub}", got "${payload.sub ?? "(none)"}"`,
-      details: { claim: "sub", expected: matchers.sub, actual: payload.sub },
-    });
-  }
-
-  // Check audience
-  if (matchers.aud !== undefined) {
-    const expectedAuds = Array.isArray(matchers.aud)
-      ? matchers.aud
-      : [matchers.aud];
-    const actualAuds = payload.aud
-      ? Array.isArray(payload.aud)
-        ? payload.aud
-        : [payload.aud]
-      : [];
-
-    const hasMatchingAud = expectedAuds.some((exp) => actualAuds.includes(exp));
-    if (!hasMatchingAud) {
-      errors.push({
-        code: "CLAIM_MISMATCH",
-        message: `Audience mismatch: expected one of [${expectedAuds.join(", ")}], got [${actualAuds.join(", ") || "(none)"}]`,
-        details: { claim: "aud", expected: expectedAuds, actual: actualAuds },
-      });
-    }
-  }
-
   // Check required flags
-  if (matchers.requiredFlags && matchers.requiredFlags.length > 0) {
+  if (options.requiredFlags && options.requiredFlags.length > 0) {
     const licenseFlags = payload.flags ?? [];
-    for (const flag of matchers.requiredFlags) {
+    for (const flag of options.requiredFlags) {
       if (!licenseFlags.includes(flag)) {
         errors.push({
           code: "MISSING_REQUIRED_FLAG",
@@ -169,13 +136,13 @@ export function validateClaimMatchers(
   }
 
   // Check required kind (exact match)
-  if (matchers.requiredKind !== undefined) {
-    if (payload.kind !== matchers.requiredKind) {
+  if (options.requiredKind !== undefined) {
+    if (payload.kind !== options.requiredKind) {
       errors.push({
         code: "KIND_MISMATCH",
-        message: `Kind mismatch: expected "${matchers.requiredKind}", got "${payload.kind ?? "(none)"}"`,
+        message: `Kind mismatch: expected "${options.requiredKind}", got "${payload.kind ?? "(none)"}"`,
         details: {
-          requiredKind: matchers.requiredKind,
+          requiredKind: options.requiredKind,
           actualKind: payload.kind,
         },
       });
@@ -183,10 +150,10 @@ export function validateClaimMatchers(
   }
 
   // Check required features (keys in the features map)
-  if (matchers.requiredFeatures && matchers.requiredFeatures.length > 0) {
+  if (options.requiredFeatures && options.requiredFeatures.length > 0) {
     const licenseFeatures = payload.features ?? {};
     const availableKeys = Object.keys(licenseFeatures);
-    for (const feature of matchers.requiredFeatures) {
+    for (const feature of options.requiredFeatures) {
       if (!(feature in licenseFeatures)) {
         errors.push({
           code: "MISSING_REQUIRED_FEATURE",

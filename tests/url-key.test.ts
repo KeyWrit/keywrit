@@ -4,7 +4,7 @@
 
 import { describe, test, expect, mock } from "bun:test";
 import { LicenseValidator } from "../src/index.ts";
-import { createToken, publicKeyHex, futureTimestamp } from "./helpers.ts";
+import { createToken, publicKeyHex, futureTimestamp, TEST_LIBRARY_ID } from "./helpers.ts";
 
 describe("public key from URL", () => {
   test("creates validator from URL", async () => {
@@ -20,6 +20,7 @@ describe("public key from URL", () => {
     try {
       const validator = await LicenseValidator.create({
         publicKeyUrl: "https://example.com/public-key",
+        libraryId: TEST_LIBRARY_ID,
       });
 
       const token = await createToken({
@@ -43,6 +44,7 @@ describe("public key from URL", () => {
     try {
       const validator = await LicenseValidator.create({
         publicKeyUrl: "https://example.com/public-key",
+        libraryId: TEST_LIBRARY_ID,
       });
 
       const token = await createToken({
@@ -67,6 +69,7 @@ describe("public key from URL", () => {
       await expect(
         LicenseValidator.create({
           publicKeyUrl: "https://example.com/missing-key",
+          libraryId: TEST_LIBRARY_ID,
         })
       ).rejects.toThrow("Failed to fetch public key");
     } finally {
@@ -74,7 +77,7 @@ describe("public key from URL", () => {
     }
   });
 
-  test("passes claim matchers from URL config", async () => {
+  test("passes required flags from URL config", async () => {
     const originalFetch = globalThis.fetch;
     globalThis.fetch = mock(async () => {
       return new Response(publicKeyHex, { status: 200 });
@@ -83,19 +86,20 @@ describe("public key from URL", () => {
     try {
       const validator = await LicenseValidator.create({
         publicKeyUrl: "https://example.com/public-key",
-        claims: { iss: "mycompany" },
+        libraryId: TEST_LIBRARY_ID,
+        requiredFlags: ["premium"],
       });
 
       const token = await createToken({
-        iss: "wrongcompany",
         sub: "test-user",
         exp: futureTimestamp(3600),
+        flags: [],
       });
 
       const result = await validator.validate(token);
       expect(result.valid).toBe(false);
       if (!result.valid) {
-        expect(result.error.code).toBe("CLAIM_MISMATCH");
+        expect(result.error.code).toBe("MISSING_REQUIRED_FLAG");
       }
     } finally {
       globalThis.fetch = originalFetch;

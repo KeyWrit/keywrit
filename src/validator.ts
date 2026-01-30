@@ -11,11 +11,11 @@ import type {
   FlagCheckResult,
   ExpirationInfo,
   ValidationWarning,
-  PublicKeyInput,
 } from "./types/index.ts";
 import { decodeJWT, decodePayload } from "./jwt/decode.ts";
 import { verifySignature } from "./jwt/verify.ts";
 import { validateTimingClaims, validateClaimMatchers } from "./jwt/claims.ts";
+import { validateInternalClaims } from "./jwt/internal-claims.ts";
 import { normalizePublicKey } from "./utils/keys.ts";
 import { now, formatDuration } from "./utils/time.ts";
 import { malformedToken, invalidHeader, invalidPayload } from "./errors.ts";
@@ -27,7 +27,10 @@ export class LicenseValidator<T = Record<string, unknown>> {
   private readonly publicKey: Uint8Array;
   private readonly revocationUrl?: string;
   private readonly revocation?: RevocationList;
-  private readonly claims?: ValidatorConfig["claims"];
+  private readonly libraryId: string;
+  private readonly requiredFlags?: string[];
+  private readonly requiredKind?: string;
+  private readonly requiredFeatures?: string[];
   private readonly timing?: ValidatorConfig["timing"];
   private readonly allowNoExpiration?: boolean;
 
@@ -38,7 +41,10 @@ export class LicenseValidator<T = Record<string, unknown>> {
     this.publicKey = publicKey;
     this.revocationUrl = "revocationUrl" in config ? config.revocationUrl : undefined;
     this.revocation = "revocation" in config ? config.revocation : undefined;
-    this.claims = config.claims;
+    this.libraryId = config.libraryId;
+    this.requiredFlags = config.requiredFlags;
+    this.requiredKind = config.requiredKind;
+    this.requiredFeatures = config.requiredFeatures;
     this.timing = config.timing;
     this.allowNoExpiration = config.allowNoExpiration;
   }
@@ -85,7 +91,9 @@ export class LicenseValidator<T = Record<string, unknown>> {
         error = malformedToken(errorMessage);
       } else if (
         errorMessage.includes("algorithm") ||
-        errorMessage.includes("type")
+        errorMessage.includes("type") ||
+        errorMessage.includes("version") ||
+        errorMessage.includes("kwv")
       ) {
         error = invalidHeader(errorMessage);
       } else if (
@@ -137,6 +145,13 @@ export class LicenseValidator<T = Record<string, unknown>> {
     const allErrors: ValidationError[] = [];
     const allWarnings: ValidationWarning[] = [];
 
+    // Validate internal claims (iss and aud)
+    const internalResult = validateInternalClaims(
+      decoded.payload as LicensePayload,
+      this.libraryId
+    );
+    allErrors.push(...internalResult.errors);
+
     // Validate timing claims
     const timingResult = validateTimingClaims(
       decoded.payload as LicensePayload,
@@ -146,15 +161,17 @@ export class LicenseValidator<T = Record<string, unknown>> {
     allErrors.push(...timingResult.errors);
     allWarnings.push(...timingResult.warnings);
 
-    // Validate claim matchers
-    if (this.claims) {
-      const claimResult = validateClaimMatchers(
-        decoded.payload as LicensePayload,
-        this.claims
-      );
-      allErrors.push(...claimResult.errors);
-      allWarnings.push(...claimResult.warnings);
-    }
+    // Validate claim matchers (flags, kind, features)
+    const claimResult = validateClaimMatchers(
+      decoded.payload as LicensePayload,
+      {
+        requiredFlags: this.requiredFlags,
+        requiredKind: this.requiredKind,
+        requiredFeatures: this.requiredFeatures,
+      }
+    );
+    allErrors.push(...claimResult.errors);
+    allWarnings.push(...claimResult.warnings);
 
     // Return failure if any errors
     if (allErrors.length > 0) {
