@@ -14,7 +14,7 @@
     "keywords": [
         "license",
         "validation",
-        "ed25519",
+        "pki",
         "jwt"
     ],
     "main": "dist/index.cjs",

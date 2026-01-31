@@ -12,11 +12,13 @@ Always run `bun run check` after making changes. This runs linting (Biome), type
 
 ## Architecture
 
+KeyWrit is signing-method agnostic. It uses PKI (public key infrastructure) for validation. The current implementation uses Ed25519, but this is an implementation detail, not a dependency.
+
 - **validators/** - Core validation logic with bound/unbound patterns
 - **types/** - TypeScript type definitions
 - **jwt/** - JWT decoding and verification
 - **utils/** - Helper functions (base64url, domain matching, key parsing, time)
-- **crypto/** - Ed25519 signature verification using @noble/ed25519
+- **crypto/** - Signature verification (currently Ed25519 via @noble/ed25519)
 
 ## Testing
 
