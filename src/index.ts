@@ -1,8 +1,5 @@
 // Main validator classes
 // LicenseValidator is exported as the main entry point with static factory methods
-export { LicenseValidator } from "./validators/index.ts";
-export { LicenseValidatorUnbound } from "./validators/index.ts";
-export { LicenseValidatorBound } from "./validators/index.ts";
 
 // Constants
 export {
@@ -10,40 +7,43 @@ export {
   KEYWRIT_VERSION,
   SUPPORTED_VERSIONS,
 } from "./constants.ts";
-
+// Utility functions
+export { decode, decodePayload } from "./jwt/decode.ts";
 // Types
 export type {
-  // Configuration
-  PublicKeyInput,
-  ValidatorConfig,
-  TimingOptions,
-  RevocationList,
+  DecodedJWT,
+  DomainCheckResult,
+  ExpirationInfo,
+  // Flag checking
+  FlagCheckResult,
   // JWT structure
   JWTHeader,
-  StandardClaims,
   LicenseClaims,
   LicensePayload,
-  DecodedJWT,
+  // Configuration
+  PublicKeyInput,
+  RevocationList,
+  StandardClaims,
+  TimingOptions,
+  ValidationError,
+  ValidationErrorCode,
+  ValidationFailure,
   // Validation results
   ValidationResult,
   ValidationSuccess,
-  ValidationFailure,
-  ValidationError,
-  ValidationErrorCode,
   ValidationWarning,
   ValidationWarningCode,
-  // Flag checking
-  FlagCheckResult,
-  ExpirationInfo,
-  DomainCheckResult,
+  ValidatorConfig,
 } from "./types/index.ts";
+export {
+  LicenseValidator,
+  LicenseValidatorBound,
+  LicenseValidatorUnbound,
+} from "./validators/index.ts";
 
-// Utility functions
-export { decode, decodePayload } from "./jwt/decode.ts";
-
+import type { ValidationResult, ValidatorConfig } from "./types/index.ts";
 // One-shot validation function
 import { LicenseValidator } from "./validators/index.ts";
-import type { ValidatorConfig, ValidationResult } from "./types/index.ts";
 
 /**
  * One-shot license validation
@@ -58,7 +58,7 @@ import type { ValidatorConfig, ValidationResult } from "./types/index.ts";
 export async function validateLicense<T = Record<string, unknown>>(
   realm: string,
   token: string,
-  config: ValidatorConfig
+  config: ValidatorConfig,
 ): Promise<ValidationResult<T>> {
   const validator = await LicenseValidator.create<T>(realm, config);
   return validator.validate(token);
@@ -78,7 +78,7 @@ export async function validateLicense<T = Record<string, unknown>>(
  */
 export async function createValidator<T = Record<string, unknown>>(
   realm: string,
-  config: ValidatorConfig
+  config: ValidatorConfig,
 ): Promise<(token: string) => Promise<ValidationResult<T>>> {
   const validator = await LicenseValidator.create<T>(realm, config);
   return (token: string) => validator.validate(token);

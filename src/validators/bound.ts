@@ -3,22 +3,24 @@
  */
 
 import type {
-  ValidatorConfig,
-  ValidationResult,
-  ValidationError,
-  LicensePayload,
   ExpirationInfo,
+  LicensePayload,
+  ValidationError,
+  ValidationResult,
+  ValidatorConfig,
 } from "../types";
+import { isDomainAllowed as checkDomainMatch } from "../utils/domain.ts";
+import { computeExpirationInfo } from "../utils/time.ts";
 import { LicenseValidator } from "./base.ts";
 import { LicenseValidatorUnbound } from "./unbound.ts";
-import { computeExpirationInfo } from "../utils/time.ts";
-import { isDomainAllowed as checkDomainMatch } from "../utils/domain.ts";
 
 /**
  * Bound license validator - pre-validated token with sync access.
  * All methods operate on the bound token synchronously.
  */
-export class LicenseValidatorBound<T = Record<string, unknown>> extends LicenseValidator<T> {
+export class LicenseValidatorBound<
+  T = Record<string, unknown>,
+> extends LicenseValidator<T> {
   private readonly token: string;
   private readonly result: ValidationResult<T>;
 
@@ -28,7 +30,7 @@ export class LicenseValidatorBound<T = Record<string, unknown>> extends LicenseV
     publicKey: Uint8Array,
     config: ValidatorConfig,
     token: string,
-    result: ValidationResult<T>
+    result: ValidationResult<T>,
   ) {
     super(realm, publicKey, config);
     this.token = token;
@@ -186,7 +188,10 @@ export class LicenseValidatorBound<T = Record<string, unknown>> extends LicenseV
     if (!this.result.valid) {
       return null;
     }
-    return computeExpirationInfo(this.result.license.exp, this.timing?.currentTime);
+    return computeExpirationInfo(
+      this.result.license.exp,
+      this.timing?.currentTime,
+    );
   }
 
   /**
@@ -201,7 +206,7 @@ export class LicenseValidatorBound<T = Record<string, unknown>> extends LicenseV
       this.publicKey,
       this.buildConfig(),
       this.token,
-      result
+      result,
     );
   }
 
@@ -213,7 +218,7 @@ export class LicenseValidatorBound<T = Record<string, unknown>> extends LicenseV
     return new LicenseValidatorUnbound<T>(
       this.realm,
       this.publicKey,
-      this.buildConfig()
+      this.buildConfig(),
     );
   }
 }

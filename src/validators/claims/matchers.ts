@@ -26,7 +26,7 @@ export interface ClaimMatcherOptions {
  */
 export function validateClaimMatchers(
   payload: LicensePayload,
-  options: ClaimMatcherOptions
+  options: ClaimMatcherOptions,
 ): ClaimValidationResult {
   const errors: ValidationError[] = [];
   const warnings: ValidationWarning[] = [];

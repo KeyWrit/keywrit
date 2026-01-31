@@ -2,30 +2,32 @@
  * LicenseValidatorUnbound - On-demand validation with token as parameter
  */
 
+import { decodePayload } from "../jwt/decode.ts";
 import type {
-  ValidatorConfig,
-  ValidationResult,
-  LicensePayload,
-  FlagCheckResult,
-  ExpirationInfo,
   DomainCheckResult,
+  ExpirationInfo,
+  FlagCheckResult,
+  LicensePayload,
+  ValidationResult,
+  ValidatorConfig,
 } from "../types/index.ts";
+import { isDomainAllowed } from "../utils/domain.ts";
+import { computeExpirationInfo } from "../utils/time.ts";
 import { LicenseValidator } from "./base.ts";
 import { LicenseValidatorBound } from "./bound.ts";
-import { decodePayload } from "../jwt/decode.ts";
-import { computeExpirationInfo } from "../utils/time.ts";
-import { isDomainAllowed } from "../utils/domain.ts";
 
 /**
  * Unbound license validator - validates tokens on demand.
  * All methods require the token as a parameter.
  */
-export class LicenseValidatorUnbound<T = Record<string, unknown>> extends LicenseValidator<T> {
+export class LicenseValidatorUnbound<
+  T = Record<string, unknown>,
+> extends LicenseValidator<T> {
   /** @internal */
   public constructor(
     realm: string,
     publicKey: Uint8Array,
-    config: ValidatorConfig
+    config: ValidatorConfig,
   ) {
     super(realm, publicKey, config);
   }
@@ -73,7 +75,7 @@ export class LicenseValidatorUnbound<T = Record<string, unknown>> extends Licens
    */
   public async hasFlags(
     token: string,
-    flags: string[]
+    flags: string[],
   ): Promise<Map<string, FlagCheckResult>> {
     const result = await this.validate(token);
     const results = new Map<string, FlagCheckResult>();
@@ -126,7 +128,7 @@ export class LicenseValidatorUnbound<T = Record<string, unknown>> extends Licens
    */
   public async getFeature<V = unknown>(
     token: string,
-    feature: string
+    feature: string,
   ): Promise<V | null> {
     const result = await this.validate(token);
     if (!result.valid) {
@@ -161,7 +163,7 @@ export class LicenseValidatorUnbound<T = Record<string, unknown>> extends Licens
    */
   public async checkDomain(
     token: string,
-    hostname: string
+    hostname: string,
   ): Promise<DomainCheckResult> {
     const result = await this.validate(token);
 
@@ -225,7 +227,7 @@ export class LicenseValidatorUnbound<T = Record<string, unknown>> extends Licens
       this.publicKey,
       this.buildConfig(),
       token,
-      result
+      result,
     );
   }
 }

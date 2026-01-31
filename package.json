@@ -37,6 +37,7 @@
     "@noble/ed25519": "^3.0.0"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.3.13",
     "@types/bun": "latest",
     "bunup": "^0.16.22"
   },

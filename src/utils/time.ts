@@ -18,7 +18,7 @@ export function now(): number {
 export function isPast(
   timestamp: number,
   currentTime?: number,
-  clockSkew = 0
+  clockSkew = 0,
 ): boolean {
   const time = currentTime ?? now();
   return timestamp < time - clockSkew;
@@ -30,7 +30,7 @@ export function isPast(
 export function isFuture(
   timestamp: number,
   currentTime?: number,
-  clockSkew = 0
+  clockSkew = 0,
 ): boolean {
   const time = currentTime ?? now();
   return timestamp > time + clockSkew;
@@ -69,7 +69,7 @@ export const EXPIRING_SOON_THRESHOLD = 7 * 24 * 60 * 60;
 export function isExpiringSoon(
   exp: number,
   currentTime?: number,
-  threshold = EXPIRING_SOON_THRESHOLD
+  threshold = EXPIRING_SOON_THRESHOLD,
 ): boolean {
   const time = currentTime ?? now();
   const remaining = exp - time;
@@ -91,7 +91,7 @@ export interface ExpirationInfoResult {
  */
 export function computeExpirationInfo(
   exp: number | undefined,
-  currentTime?: number
+  currentTime?: number,
 ): ExpirationInfoResult {
   if (exp === undefined) {
     return {

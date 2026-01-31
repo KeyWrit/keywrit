@@ -2,9 +2,9 @@
  * JWT decoding utilities
  */
 
+import { SUPPORTED_VERSIONS } from "../constants.ts";
 import type { DecodedJWT, JWTHeader, LicensePayload } from "../types/index.ts";
 import { decode as base64urlDecode, decodeString } from "../utils/base64url.ts";
-import { SUPPORTED_VERSIONS } from "../constants.ts";
 
 /** Validation result for decoding */
 export type DecodeResult<T> =
@@ -16,7 +16,7 @@ export type DecodeResult<T> =
  * Returns structured error information instead of throwing
  */
 export function decodeJWT<T = Record<string, unknown>>(
-  token: string
+  token: string,
 ): DecodeResult<T> {
   // Split token into parts
   const parts = token.split(".");
@@ -116,7 +116,7 @@ export function decodeJWT<T = Record<string, unknown>>(
  * Useful for debugging or extracting info from potentially invalid tokens
  */
 export function decodePayload<T = Record<string, unknown>>(
-  token: string
+  token: string,
 ): LicensePayload<T> | null {
   const parts = token.split(".");
   if (parts.length !== 3) {
@@ -140,7 +140,7 @@ export function decodePayload<T = Record<string, unknown>>(
  * Returns null on any error
  */
 export function decode<T = Record<string, unknown>>(
-  token: string
+  token: string,
 ): DecodedJWT<T> | null {
   const result = decodeJWT<T>(token);
   return result.success ? result.data : null;

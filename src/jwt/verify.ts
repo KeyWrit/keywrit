@@ -2,8 +2,8 @@
  * JWT signature verification
  */
 
-import type { DecodedJWT, ValidationError } from "../types/index.ts";
 import { verify as ed25519Verify } from "../crypto/ed25519.ts";
+import type { DecodedJWT, ValidationError } from "../types/index.ts";
 
 /** Result of signature verification */
 export type VerifyResult =
@@ -15,7 +15,7 @@ export type VerifyResult =
  */
 export async function verifySignature(
   decoded: DecodedJWT,
-  publicKey: Uint8Array
+  publicKey: Uint8Array,
 ): Promise<VerifyResult> {
   const encoder = new TextEncoder();
   const message = encoder.encode(decoded.signingInput);

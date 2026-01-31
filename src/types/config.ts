@@ -46,4 +46,6 @@ export type RevocationSource =
   | { revocation?: never; revocationUrl?: string };
 
 /** Validator configuration */
-export type ValidatorConfig = ValidatorConfigBase & PublicKeySource & RevocationSource;
+export type ValidatorConfig = ValidatorConfigBase &
+  PublicKeySource &
+  RevocationSource;

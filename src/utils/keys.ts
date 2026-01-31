@@ -19,7 +19,7 @@ export function normalizePublicKey(input: PublicKeyInput): Uint8Array {
   if (input instanceof Uint8Array) {
     if (input.length !== ED25519_PUBLIC_KEY_LENGTH) {
       throw new Error(
-        `Invalid public key length: expected ${ED25519_PUBLIC_KEY_LENGTH} bytes, got ${input.length}`
+        `Invalid public key length: expected ${ED25519_PUBLIC_KEY_LENGTH} bytes, got ${input.length}`,
       );
     }
     return input;
@@ -36,13 +36,13 @@ export function normalizePublicKey(input: PublicKeyInput): Uint8Array {
       const bytes = base64ToBytes(input);
       if (bytes.length !== ED25519_PUBLIC_KEY_LENGTH) {
         throw new Error(
-          `Invalid public key length: expected ${ED25519_PUBLIC_KEY_LENGTH} bytes, got ${bytes.length}`
+          `Invalid public key length: expected ${ED25519_PUBLIC_KEY_LENGTH} bytes, got ${bytes.length}`,
         );
       }
       return bytes;
     } catch {
       throw new Error(
-        "Invalid public key format: expected hex string (64 chars), base64, or Uint8Array (32 bytes)"
+        "Invalid public key format: expected hex string (64 chars), base64, or Uint8Array (32 bytes)",
       );
     }
   }

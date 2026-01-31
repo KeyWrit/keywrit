@@ -16,7 +16,10 @@ export function matchesDomain(hostname: string, pattern: string): boolean {
 
   if (normalizedPattern.startsWith("*.")) {
     const suffix = normalizedPattern.slice(1); // ".example.org"
-    if (normalizedHost.endsWith(suffix) && normalizedHost.length > suffix.length) {
+    if (
+      normalizedHost.endsWith(suffix) &&
+      normalizedHost.length > suffix.length
+    ) {
       return true;
     }
   }
@@ -27,7 +30,10 @@ export function matchesDomain(hostname: string, pattern: string): boolean {
 /**
  * Check if a hostname is allowed by any of the domain patterns.
  */
-export function isDomainAllowed(hostname: string, allowedDomains: string[]): boolean {
+export function isDomainAllowed(
+  hostname: string,
+  allowedDomains: string[],
+): boolean {
   if (allowedDomains.length === 0) {
     return false;
   }

@@ -9,12 +9,12 @@ import type {
   ValidationWarning,
 } from "../../types/index.ts";
 import {
-  now,
-  isPast,
-  isFuture,
-  isExpiringSoon,
-  formatDuration,
   DEFAULT_CLOCK_SKEW,
+  formatDuration,
+  isExpiringSoon,
+  isFuture,
+  isPast,
+  now,
 } from "../../utils/time.ts";
 
 /** Result of claim validation */
@@ -29,7 +29,7 @@ export interface ClaimValidationResult {
 export function validateTimingClaims(
   payload: LicensePayload,
   options: TimingOptions = {},
-  allowNoExpiration = false
+  allowNoExpiration = false,
 ): ClaimValidationResult {
   const errors: ValidationError[] = [];
   const warnings: ValidationWarning[] = [];
@@ -63,7 +63,11 @@ export function validateTimingClaims(
     }
 
     // Check if clock skew was applied
-    if (clockSkew > 0 && payload.exp < currentTime && payload.exp >= currentTime - clockSkew) {
+    if (
+      clockSkew > 0 &&
+      payload.exp < currentTime &&
+      payload.exp >= currentTime - clockSkew
+    ) {
       warnings.push({
         code: "CLOCK_SKEW_APPLIED",
         message: `Token accepted within clock skew tolerance (${clockSkew}s)`,

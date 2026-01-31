@@ -16,7 +16,7 @@ import { verifyAsync as nobleVerifyAsync } from "@noble/ed25519";
 export async function verify(
   signature: Uint8Array,
   message: Uint8Array,
-  publicKey: Uint8Array
+  publicKey: Uint8Array,
 ): Promise<boolean> {
   try {
     return await nobleVerifyAsync(signature, message, publicKey);
@@ -34,7 +34,7 @@ export async function verify(
 export function verifySync(
   signature: Uint8Array,
   message: Uint8Array,
-  publicKey: Uint8Array
+  publicKey: Uint8Array,
 ): boolean {
   // @noble/ed25519 v2+ async by default
   // For sync, we need to configure sha512Sync
@@ -47,7 +47,7 @@ export function verifySync(
   } catch {
     // If sync fails, this is a configuration issue
     throw new Error(
-      "Synchronous verification not available. Use async verify() instead."
+      "Synchronous verification not available. Use async verify() instead.",
     );
   }
 }

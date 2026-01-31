@@ -3,17 +3,17 @@
  */
 
 export { LicenseValidator, resolvePublicKey } from "./base.ts";
-export { LicenseValidatorUnbound } from "./unbound.ts";
 export { LicenseValidatorBound } from "./bound.ts";
+export type {
+  ClaimMatcherOptions,
+  ClaimValidationResult,
+  InternalClaimValidationResult,
+} from "./claims/index.ts";
 
 // Re-export claims for internal use
 export {
-  validateTimingClaims,
   validateClaimMatchers,
   validateInternalClaims,
+  validateTimingClaims,
 } from "./claims/index.ts";
-export type {
-  ClaimValidationResult,
-  ClaimMatcherOptions,
-  InternalClaimValidationResult,
-} from "./claims/index.ts";
+export { LicenseValidatorUnbound } from "./unbound.ts";

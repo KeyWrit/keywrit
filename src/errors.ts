@@ -10,7 +10,7 @@ import type { ValidationError, ValidationErrorCode } from "./types/index.ts";
 export function createError(
   code: ValidationErrorCode,
   message: string,
-  details?: Record<string, unknown>
+  details?: Record<string, unknown>,
 ): ValidationError {
   return details ? { code, message, details } : { code, message };
 }
@@ -42,6 +42,6 @@ export function invalidPayload(reason: string): ValidationError {
 export function signatureVerificationFailed(): ValidationError {
   return createError(
     "SIGNATURE_VERIFICATION_FAILED",
-    "Signature verification failed"
+    "Signature verification failed",
   );
 }

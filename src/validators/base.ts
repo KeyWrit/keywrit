@@ -2,22 +2,22 @@
  * LicenseValidator - Abstract base class for license validation
  */
 
-import type {
-  ValidatorConfig,
-  RevocationList,
-  ValidationResult,
-  ValidationError,
-  LicensePayload,
-  ValidationWarning,
-} from "../types/index.ts";
+import { invalidHeader, invalidPayload, malformedToken } from "../errors.ts";
 import { decodeJWT, decodePayload } from "../jwt/decode.ts";
 import { verifySignature } from "../jwt/verify.ts";
-import { validateTimingClaims, validateClaimMatchers } from "./claims/index.ts";
-import { validateInternalClaims } from "./claims/internal.ts";
+import type {
+  LicensePayload,
+  RevocationList,
+  ValidationError,
+  ValidationResult,
+  ValidationWarning,
+  ValidatorConfig,
+} from "../types/index.ts";
 import { normalizePublicKey } from "../utils/keys.ts";
-import { malformedToken, invalidHeader, invalidPayload } from "../errors.ts";
-import type { LicenseValidatorUnbound } from "./unbound.ts";
 import type { LicenseValidatorBound } from "./bound.ts";
+import { validateClaimMatchers, validateTimingClaims } from "./claims/index.ts";
+import { validateInternalClaims } from "./claims/internal.ts";
+import type { LicenseValidatorUnbound } from "./unbound.ts";
 
 /**
  * Abstract base class for license validation.
@@ -37,11 +37,12 @@ export abstract class LicenseValidator<T = Record<string, unknown>> {
   protected constructor(
     realm: string,
     publicKey: Uint8Array,
-    config: ValidatorConfig
+    config: ValidatorConfig,
   ) {
     this.realm = realm;
     this.publicKey = publicKey;
-    this.revocationUrl = "revocationUrl" in config ? config.revocationUrl : undefined;
+    this.revocationUrl =
+      "revocationUrl" in config ? config.revocationUrl : undefined;
     this.revocation = "revocation" in config ? config.revocation : undefined;
     this.requiredFlags = config.requiredFlags;
     this.requiredKind = config.requiredKind;
@@ -54,14 +55,16 @@ export abstract class LicenseValidator<T = Record<string, unknown>> {
    * Perform full validation of a license token.
    * This is the shared validation logic used by both bound and unbound validators.
    */
-  protected async performValidation(token: string): Promise<ValidationResult<T>> {
+  protected async performValidation(
+    token: string,
+  ): Promise<ValidationResult<T>> {
     // Decode the token
     const decodeResult = decodeJWT<T>(token);
 
     if (!decodeResult.success) {
       // Determine error type from decode error
       const errorMessage = decodeResult.error;
-      let error;
+      let error: ValidationError;
 
       if (errorMessage.includes("structure")) {
         error = malformedToken(errorMessage);
@@ -96,7 +99,7 @@ export abstract class LicenseValidator<T = Record<string, unknown>> {
     // Verify signature
     const verifyResult = await verifySignature(
       decoded as import("../types/index.ts").DecodedJWT,
-      this.publicKey
+      this.publicKey,
     );
 
     if (!verifyResult.success) {
@@ -108,7 +111,9 @@ export abstract class LicenseValidator<T = Record<string, unknown>> {
     }
 
     // Check revocation
-    const revocationResult = await this.checkRevocation(decoded.payload as LicensePayload);
+    const revocationResult = await this.checkRevocation(
+      decoded.payload as LicensePayload,
+    );
     if (revocationResult) {
       return {
         valid: false,
@@ -124,7 +129,7 @@ export abstract class LicenseValidator<T = Record<string, unknown>> {
     // Validate internal claims (iss and aud)
     const internalResult = validateInternalClaims(
       decoded.payload as LicensePayload,
-      this.realm
+      this.realm,
     );
     allErrors.push(...internalResult.errors);
 
@@ -132,7 +137,7 @@ export abstract class LicenseValidator<T = Record<string, unknown>> {
     const timingResult = validateTimingClaims(
       decoded.payload as LicensePayload,
       this.timing,
-      this.allowNoExpiration
+      this.allowNoExpiration,
     );
     allErrors.push(...timingResult.errors);
     allWarnings.push(...timingResult.warnings);
@@ -144,7 +149,7 @@ export abstract class LicenseValidator<T = Record<string, unknown>> {
         requiredFlags: this.requiredFlags,
         requiredKind: this.requiredKind,
         requiredFeatures: this.requiredFeatures,
-      }
+      },
     );
     allErrors.push(...claimResult.errors);
     allWarnings.push(...claimResult.warnings);
@@ -170,9 +175,11 @@ export abstract class LicenseValidator<T = Record<string, unknown>> {
   /**
    * Check if a token is revoked
    */
-  protected async checkRevocation(
-    payload: LicensePayload
-  ): Promise<{ code: "TOKEN_REVOKED"; message: string; details?: Record<string, unknown> } | null> {
+  protected async checkRevocation(payload: LicensePayload): Promise<{
+    code: "TOKEN_REVOKED";
+    message: string;
+    details?: Record<string, unknown>;
+  } | null> {
     // Get revocation list from static config or URL
     let revocationList: RevocationList | null = null;
 
@@ -254,7 +261,7 @@ export abstract class LicenseValidator<T = Record<string, unknown>> {
    */
   public static async create<T = Record<string, unknown>>(
     realm: string,
-    config: ValidatorConfig
+    config: ValidatorConfig,
   ): Promise<LicenseValidatorUnbound<T>> {
     // Dynamic import to avoid circular dependency
     const { LicenseValidatorUnbound: Unbound } = await import("./unbound.ts");
@@ -269,7 +276,7 @@ export abstract class LicenseValidator<T = Record<string, unknown>> {
   public static async createWithToken<T = Record<string, unknown>>(
     realm: string,
     config: ValidatorConfig,
-    token: string
+    token: string,
   ): Promise<LicenseValidatorBound<T>> {
     const unbound = await LicenseValidator.create<T>(realm, config);
     return unbound.bind(token);
@@ -279,14 +286,16 @@ export abstract class LicenseValidator<T = Record<string, unknown>> {
 /**
  * Resolve public key from config (either direct key or URL)
  */
-export async function resolvePublicKey(config: ValidatorConfig): Promise<Uint8Array> {
+export async function resolvePublicKey(
+  config: ValidatorConfig,
+): Promise<Uint8Array> {
   if ("publicKey" in config && config.publicKey) {
     return normalizePublicKey(config.publicKey);
   } else if ("publicKeyUrl" in config && config.publicKeyUrl) {
     const response = await fetch(config.publicKeyUrl);
     if (!response.ok) {
       throw new Error(
-        `Failed to fetch public key from ${config.publicKeyUrl}: ${response.status} ${response.statusText}`
+        `Failed to fetch public key from ${config.publicKeyUrl}: ${response.status} ${response.statusText}`,
       );
     }
     const keyText = (await response.text()).trim();

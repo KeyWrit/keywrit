@@ -2,39 +2,35 @@
  * Type definitions barrel export
  */
 
-// JWT types
-export type {
-  JWTHeader,
-  StandardClaims,
-  LicenseClaims,
-  LicensePayload,
-  DecodedJWT,
-} from "./jwt.ts";
-
 // Configuration types
 export type {
   PublicKeyInput,
-  TimingOptions,
   RevocationList,
+  TimingOptions,
   ValidatorConfig,
 } from "./config.ts";
-
 // Error types
-export type { ValidationErrorCode, ValidationError } from "./errors.ts";
-
-// Warning types
-export type { ValidationWarningCode, ValidationWarning } from "./warnings.ts";
+export type { ValidationError, ValidationErrorCode } from "./errors.ts";
+// Helper types
+export type {
+  DomainCheckResult,
+  ExpirationInfo,
+  FlagCheckResult,
+} from "./helpers.ts";
+// JWT types
+export type {
+  DecodedJWT,
+  JWTHeader,
+  LicenseClaims,
+  LicensePayload,
+  StandardClaims,
+} from "./jwt.ts";
 
 // Result types
 export type {
-  ValidationSuccess,
   ValidationFailure,
   ValidationResult,
+  ValidationSuccess,
 } from "./results.ts";
-
-// Helper types
-export type {
-  FlagCheckResult,
-  ExpirationInfo,
-  DomainCheckResult,
-} from "./helpers.ts";
+// Warning types
+export type { ValidationWarning, ValidationWarningCode } from "./warnings.ts";

@@ -2,8 +2,8 @@
  * Validation result type definitions
  */
 
-import type { LicensePayload } from "./jwt.ts";
 import type { ValidationError } from "./errors.ts";
+import type { LicensePayload } from "./jwt.ts";
 import type { ValidationWarning } from "./warnings.ts";
 
 /** Successful validation result */
