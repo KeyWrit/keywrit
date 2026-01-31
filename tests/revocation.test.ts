@@ -2,9 +2,14 @@
  * Tests for revocation list
  */
 
-import { describe, test, expect, mock } from "bun:test";
+import { describe, expect, test, vi } from "vitest";
 import { LicenseValidator } from "../src/index.ts";
-import { createToken, publicKeyHex, futureTimestamp, TEST_REALM } from "./helpers.ts";
+import {
+  createToken,
+  futureTimestamp,
+  publicKeyHex,
+  TEST_REALM,
+} from "./helpers.ts";
 
 describe("revocation", () => {
   describe("static revocation list", () => {
@@ -93,12 +98,11 @@ describe("revocation", () => {
   describe("static key with URL revocation", () => {
     test("fetches revocation list from URL with static public key", async () => {
       const originalFetch = globalThis.fetch;
-      globalThis.fetch = mock(async (url: string) => {
+      globalThis.fetch = vi.fn(async (url: string) => {
         if (url === "https://example.com/revocation.json") {
-          return new Response(
-            JSON.stringify({ jti: ["revoked-token"] }),
-            { status: 200 }
-          );
+          return new Response(JSON.stringify({ jti: ["revoked-token"] }), {
+            status: 200,
+          });
         }
         return originalFetch(url);
       }) as typeof fetch;
@@ -127,12 +131,11 @@ describe("revocation", () => {
 
     test("allows valid token with static key and URL revocation", async () => {
       const originalFetch = globalThis.fetch;
-      globalThis.fetch = mock(async (url: string) => {
+      globalThis.fetch = vi.fn(async (url: string) => {
         if (url === "https://example.com/revocation.json") {
-          return new Response(
-            JSON.stringify({ jti: ["other-token"] }),
-            { status: 200 }
-          );
+          return new Response(JSON.stringify({ jti: ["other-token"] }), {
+            status: 200,
+          });
         }
         return originalFetch(url);
       }) as typeof fetch;
@@ -160,15 +163,15 @@ describe("revocation", () => {
   describe("URL-based revocation list", () => {
     test("fetches and checks revocation list from URL", async () => {
       const originalFetch = globalThis.fetch;
-      globalThis.fetch = mock(async (url: string) => {
+      globalThis.fetch = vi.fn(async (url: string) => {
         if (url === "https://example.com/public-key") {
           return new Response(publicKeyHex, { status: 200 });
         }
         if (url === "https://example.com/revocation.json") {
-          return new Response(
-            JSON.stringify({ jti: ["revoked-via-url"] }),
-            { status: 200, headers: { "Content-Type": "application/json" } }
-          );
+          return new Response(JSON.stringify({ jti: ["revoked-via-url"] }), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          });
         }
         return originalFetch(url);
       }) as typeof fetch;
@@ -197,15 +200,14 @@ describe("revocation", () => {
 
     test("allows valid token when using revocation URL", async () => {
       const originalFetch = globalThis.fetch;
-      globalThis.fetch = mock(async (url: string) => {
+      globalThis.fetch = vi.fn(async (url: string) => {
         if (url === "https://example.com/public-key") {
           return new Response(publicKeyHex, { status: 200 });
         }
         if (url === "https://example.com/revocation.json") {
-          return new Response(
-            JSON.stringify({ jti: ["other-token"] }),
-            { status: 200 }
-          );
+          return new Response(JSON.stringify({ jti: ["other-token"] }), {
+            status: 200,
+          });
         }
         return originalFetch(url);
       }) as typeof fetch;
@@ -231,7 +233,7 @@ describe("revocation", () => {
 
     test("continues validation when revocation URL fails", async () => {
       const originalFetch = globalThis.fetch;
-      globalThis.fetch = mock(async (url: string) => {
+      globalThis.fetch = vi.fn(async (url: string) => {
         if (url === "https://example.com/public-key") {
           return new Response(publicKeyHex, { status: 200 });
         }
@@ -262,7 +264,7 @@ describe("revocation", () => {
 
     test("continues validation when revocation URL returns invalid JSON", async () => {
       const originalFetch = globalThis.fetch;
-      globalThis.fetch = mock(async (url: string) => {
+      globalThis.fetch = vi.fn(async (url: string) => {
         if (url === "https://example.com/public-key") {
           return new Response(publicKeyHex, { status: 200 });
         }
@@ -293,7 +295,7 @@ describe("revocation", () => {
 
     test("works without revocation URL", async () => {
       const originalFetch = globalThis.fetch;
-      globalThis.fetch = mock(async (url: string) => {
+      globalThis.fetch = vi.fn(async (url: string) => {
         if (url === "https://example.com/public-key") {
           return new Response(publicKeyHex, { status: 200 });
         }

@@ -2,16 +2,24 @@
  * Tests for expiration info utility
  */
 
-import { describe, test, expect } from "bun:test";
+import { describe, expect, test } from "vitest";
 import { LicenseValidator } from "../src/index.ts";
-import { createToken, publicKeyHex, futureTimestamp, pastTimestamp, TEST_REALM } from "./helpers.ts";
+import {
+  createToken,
+  futureTimestamp,
+  pastTimestamp,
+  publicKeyHex,
+  TEST_REALM,
+} from "./helpers.ts";
 
 describe("expiration info", () => {
   test("returns correct info for valid token", async () => {
     const exp = futureTimestamp(3600);
     const token = await createToken({ sub: "test", exp });
 
-    const validator = await LicenseValidator.create(TEST_REALM, { publicKey: publicKeyHex });
+    const validator = await LicenseValidator.create(TEST_REALM, {
+      publicKey: publicKeyHex,
+    });
     const info = validator.getExpirationInfo(token);
 
     expect(info).not.toBeNull();
@@ -26,7 +34,9 @@ describe("expiration info", () => {
     const exp = pastTimestamp(3600);
     const token = await createToken({ sub: "test", exp });
 
-    const validator = await LicenseValidator.create(TEST_REALM, { publicKey: publicKeyHex });
+    const validator = await LicenseValidator.create(TEST_REALM, {
+      publicKey: publicKeyHex,
+    });
     const info = validator.getExpirationInfo(token);
 
     expect(info).not.toBeNull();
@@ -38,7 +48,9 @@ describe("expiration info", () => {
   test("returns null values for token without expiration", async () => {
     const token = await createToken({ sub: "test" });
 
-    const validator = await LicenseValidator.create(TEST_REALM, { publicKey: publicKeyHex });
+    const validator = await LicenseValidator.create(TEST_REALM, {
+      publicKey: publicKeyHex,
+    });
     const info = validator.getExpirationInfo(token);
 
     expect(info).not.toBeNull();
@@ -49,7 +61,9 @@ describe("expiration info", () => {
   });
 
   test("returns null for invalid token", async () => {
-    const validator = await LicenseValidator.create(TEST_REALM, { publicKey: publicKeyHex });
+    const validator = await LicenseValidator.create(TEST_REALM, {
+      publicKey: publicKeyHex,
+    });
     const info = validator.getExpirationInfo("invalid-token");
 
     expect(info).toBeNull();
@@ -59,7 +73,9 @@ describe("expiration info", () => {
     const exp = futureTimestamp(30);
     const token = await createToken({ sub: "test", exp });
 
-    const validator = await LicenseValidator.create(TEST_REALM, { publicKey: publicKeyHex });
+    const validator = await LicenseValidator.create(TEST_REALM, {
+      publicKey: publicKeyHex,
+    });
     const info = validator.getExpirationInfo(token);
 
     expect(info?.timeRemaining).toContain("second");
@@ -69,7 +85,9 @@ describe("expiration info", () => {
     const exp = futureTimestamp(300);
     const token = await createToken({ sub: "test", exp });
 
-    const validator = await LicenseValidator.create(TEST_REALM, { publicKey: publicKeyHex });
+    const validator = await LicenseValidator.create(TEST_REALM, {
+      publicKey: publicKeyHex,
+    });
     const info = validator.getExpirationInfo(token);
 
     expect(info?.timeRemaining).toContain("minute");
@@ -79,7 +97,9 @@ describe("expiration info", () => {
     const exp = futureTimestamp(86400 * 5);
     const token = await createToken({ sub: "test", exp });
 
-    const validator = await LicenseValidator.create(TEST_REALM, { publicKey: publicKeyHex });
+    const validator = await LicenseValidator.create(TEST_REALM, {
+      publicKey: publicKeyHex,
+    });
     const info = validator.getExpirationInfo(token);
 
     expect(info?.timeRemaining).toContain("day");

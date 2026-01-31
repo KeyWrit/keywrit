@@ -2,10 +2,10 @@
  * Test helpers and fixtures
  */
 
-import { beforeAll } from "bun:test";
 import * as ed25519 from "@noble/ed25519";
-import { encode as base64urlEncode } from "../src/utils/base64url.ts";
+import { beforeAll } from "vitest";
 import { KEYWRIT_ISSUER, KEYWRIT_VERSION } from "../src/constants.ts";
+import { encode as base64urlEncode } from "../src/utils/base64url.ts";
 
 // Test key pair (generated once)
 export let privateKey: Uint8Array;
@@ -43,7 +43,7 @@ export interface CreateTokenOptions {
  */
 export async function createToken(
   payload: Record<string, unknown>,
-  options?: CreateTokenOptions
+  options?: CreateTokenOptions,
 ): Promise<string> {
   // Build header with KeyWrit version
   const header = options?.header ?? {
@@ -60,17 +60,17 @@ export async function createToken(
   };
 
   const headerB64 = base64urlEncode(
-    new TextEncoder().encode(JSON.stringify(header))
+    new TextEncoder().encode(JSON.stringify(header)),
   );
   const payloadB64 = base64urlEncode(
-    new TextEncoder().encode(JSON.stringify(fullPayload))
+    new TextEncoder().encode(JSON.stringify(fullPayload)),
   );
   const signingInput = `${headerB64}.${payloadB64}`;
 
   const key = options?.privateKey ?? privateKey;
   const signature = await ed25519.signAsync(
     new TextEncoder().encode(signingInput),
-    key
+    key,
   );
   const signatureB64 = base64urlEncode(signature);
 
@@ -83,20 +83,20 @@ export async function createToken(
 export async function createRawToken(
   header: Record<string, unknown>,
   payload: Record<string, unknown>,
-  options?: { privateKey?: Uint8Array }
+  options?: { privateKey?: Uint8Array },
 ): Promise<string> {
   const headerB64 = base64urlEncode(
-    new TextEncoder().encode(JSON.stringify(header))
+    new TextEncoder().encode(JSON.stringify(header)),
   );
   const payloadB64 = base64urlEncode(
-    new TextEncoder().encode(JSON.stringify(payload))
+    new TextEncoder().encode(JSON.stringify(payload)),
   );
   const signingInput = `${headerB64}.${payloadB64}`;
 
   const key = options?.privateKey ?? privateKey;
   const signature = await ed25519.signAsync(
     new TextEncoder().encode(signingInput),
-    key
+    key,
   );
   const signatureB64 = base64urlEncode(signature);
 

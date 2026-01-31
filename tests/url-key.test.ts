@@ -2,15 +2,20 @@
  * Tests for public key URL fetching
  */
 
-import { describe, test, expect, mock } from "bun:test";
+import { describe, expect, test, vi } from "vitest";
 import { LicenseValidator } from "../src/index.ts";
-import { createToken, publicKeyHex, futureTimestamp, TEST_REALM } from "./helpers.ts";
+import {
+  createToken,
+  futureTimestamp,
+  publicKeyHex,
+  TEST_REALM,
+} from "./helpers.ts";
 
 describe("public key from URL", () => {
   test("creates validator from URL", async () => {
     // Mock fetch to return the public key
     const originalFetch = globalThis.fetch;
-    globalThis.fetch = mock(async (url: string) => {
+    globalThis.fetch = vi.fn(async (url: string) => {
       if (url === "https://example.com/public-key") {
         return new Response(publicKeyHex, { status: 200 });
       }
@@ -36,7 +41,7 @@ describe("public key from URL", () => {
 
   test("handles whitespace in fetched key", async () => {
     const originalFetch = globalThis.fetch;
-    globalThis.fetch = mock(async () => {
+    globalThis.fetch = vi.fn(async () => {
       return new Response(`  ${publicKeyHex}  \n`, { status: 200 });
     }) as typeof fetch;
 
@@ -59,15 +64,18 @@ describe("public key from URL", () => {
 
   test("throws on fetch failure", async () => {
     const originalFetch = globalThis.fetch;
-    globalThis.fetch = mock(async () => {
-      return new Response("Not found", { status: 404, statusText: "Not Found" });
+    globalThis.fetch = vi.fn(async () => {
+      return new Response("Not found", {
+        status: 404,
+        statusText: "Not Found",
+      });
     }) as typeof fetch;
 
     try {
       await expect(
         LicenseValidator.create(TEST_REALM, {
           publicKeyUrl: "https://example.com/missing-key",
-        })
+        }),
       ).rejects.toThrow("Failed to fetch public key");
     } finally {
       globalThis.fetch = originalFetch;
@@ -76,7 +84,7 @@ describe("public key from URL", () => {
 
   test("passes required flags from URL config", async () => {
     const originalFetch = globalThis.fetch;
-    globalThis.fetch = mock(async () => {
+    globalThis.fetch = vi.fn(async () => {
       return new Response(publicKeyHex, { status: 200 });
     }) as typeof fetch;
 

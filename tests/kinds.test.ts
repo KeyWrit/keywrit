@@ -2,9 +2,14 @@
  * Tests for kind checking methods
  */
 
-import { describe, test, expect } from "bun:test";
+import { describe, expect, test } from "vitest";
 import { LicenseValidator } from "../src/index.ts";
-import { createToken, publicKeyHex, futureTimestamp, TEST_REALM } from "./helpers.ts";
+import {
+  createToken,
+  futureTimestamp,
+  publicKeyHex,
+  TEST_REALM,
+} from "./helpers.ts";
 
 describe("kind checking", () => {
   describe("getKind", () => {
@@ -15,7 +20,9 @@ describe("kind checking", () => {
         exp: futureTimestamp(3600),
       });
 
-      const validator = await LicenseValidator.create(TEST_REALM, { publicKey: publicKeyHex });
+      const validator = await LicenseValidator.create(TEST_REALM, {
+        publicKey: publicKeyHex,
+      });
       const kind = await validator.getKind(token);
 
       expect(kind).toBe("enterprise");
@@ -27,14 +34,18 @@ describe("kind checking", () => {
         exp: futureTimestamp(3600),
       });
 
-      const validator = await LicenseValidator.create(TEST_REALM, { publicKey: publicKeyHex });
+      const validator = await LicenseValidator.create(TEST_REALM, {
+        publicKey: publicKeyHex,
+      });
       const kind = await validator.getKind(token);
 
       expect(kind).toBeNull();
     });
 
     test("returns null for invalid token", async () => {
-      const validator = await LicenseValidator.create(TEST_REALM, { publicKey: publicKeyHex });
+      const validator = await LicenseValidator.create(TEST_REALM, {
+        publicKey: publicKeyHex,
+      });
       const kind = await validator.getKind("invalid-token");
 
       expect(kind).toBeNull();
@@ -49,7 +60,9 @@ describe("kind checking", () => {
         exp: futureTimestamp(3600),
       });
 
-      const validator = await LicenseValidator.create(TEST_REALM, { publicKey: publicKeyHex });
+      const validator = await LicenseValidator.create(TEST_REALM, {
+        publicKey: publicKeyHex,
+      });
 
       expect(await validator.hasKind(token, "pro")).toBe(true);
     });
@@ -61,7 +74,9 @@ describe("kind checking", () => {
         exp: futureTimestamp(3600),
       });
 
-      const validator = await LicenseValidator.create(TEST_REALM, { publicKey: publicKeyHex });
+      const validator = await LicenseValidator.create(TEST_REALM, {
+        publicKey: publicKeyHex,
+      });
 
       expect(await validator.hasKind(token, "free")).toBe(true);
       expect(await validator.hasKind(token, "pro")).toBe(false);
@@ -69,7 +84,9 @@ describe("kind checking", () => {
     });
 
     test("returns false for invalid token", async () => {
-      const validator = await LicenseValidator.create(TEST_REALM, { publicKey: publicKeyHex });
+      const validator = await LicenseValidator.create(TEST_REALM, {
+        publicKey: publicKeyHex,
+      });
 
       expect(await validator.hasKind("invalid", "free")).toBe(false);
     });
@@ -80,7 +97,9 @@ describe("kind checking", () => {
         exp: futureTimestamp(3600),
       });
 
-      const validator = await LicenseValidator.create(TEST_REALM, { publicKey: publicKeyHex });
+      const validator = await LicenseValidator.create(TEST_REALM, {
+        publicKey: publicKeyHex,
+      });
 
       expect(await validator.hasKind(token, "free")).toBe(false);
     });

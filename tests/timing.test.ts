@@ -2,9 +2,15 @@
  * Tests for timing claim validation
  */
 
-import { describe, test, expect } from "bun:test";
+import { describe, expect, test } from "vitest";
 import { LicenseValidator } from "../src/index.ts";
-import { createToken, publicKeyHex, futureTimestamp, pastTimestamp, TEST_REALM } from "./helpers.ts";
+import {
+  createToken,
+  futureTimestamp,
+  pastTimestamp,
+  publicKeyHex,
+  TEST_REALM,
+} from "./helpers.ts";
 
 describe("timing validation", () => {
   describe("expiration (exp)", () => {
@@ -14,7 +20,9 @@ describe("timing validation", () => {
         exp: futureTimestamp(3600),
       });
 
-      const validator = await LicenseValidator.create(TEST_REALM, { publicKey: publicKeyHex });
+      const validator = await LicenseValidator.create(TEST_REALM, {
+        publicKey: publicKeyHex,
+      });
       const result = await validator.validate(token);
 
       expect(result.valid).toBe(true);
@@ -26,7 +34,9 @@ describe("timing validation", () => {
         exp: pastTimestamp(3600),
       });
 
-      const validator = await LicenseValidator.create(TEST_REALM, { publicKey: publicKeyHex });
+      const validator = await LicenseValidator.create(TEST_REALM, {
+        publicKey: publicKeyHex,
+      });
       const result = await validator.validate(token);
 
       expect(result.valid).toBe(false);
@@ -39,7 +49,9 @@ describe("timing validation", () => {
     test("requires expiration by default", async () => {
       const token = await createToken({ sub: "test" });
 
-      const validator = await LicenseValidator.create(TEST_REALM, { publicKey: publicKeyHex });
+      const validator = await LicenseValidator.create(TEST_REALM, {
+        publicKey: publicKeyHex,
+      });
       const result = await validator.validate(token);
 
       expect(result.valid).toBe(false);
@@ -59,7 +71,9 @@ describe("timing validation", () => {
 
       expect(result.valid).toBe(true);
       if (result.valid) {
-        expect(result.warnings?.some((w) => w.code === "NO_EXPIRATION")).toBe(true);
+        expect(result.warnings?.some((w) => w.code === "NO_EXPIRATION")).toBe(
+          true,
+        );
       }
     });
 
@@ -69,12 +83,16 @@ describe("timing validation", () => {
         exp: futureTimestamp(3600), // 1 hour (within 7 day warning threshold)
       });
 
-      const validator = await LicenseValidator.create(TEST_REALM, { publicKey: publicKeyHex });
+      const validator = await LicenseValidator.create(TEST_REALM, {
+        publicKey: publicKeyHex,
+      });
       const result = await validator.validate(token);
 
       expect(result.valid).toBe(true);
       if (result.valid) {
-        expect(result.warnings?.some((w) => w.code === "EXPIRING_SOON")).toBe(true);
+        expect(result.warnings?.some((w) => w.code === "EXPIRING_SOON")).toBe(
+          true,
+        );
       }
     });
   });
@@ -87,7 +105,9 @@ describe("timing validation", () => {
         nbf: pastTimestamp(3600),
       });
 
-      const validator = await LicenseValidator.create(TEST_REALM, { publicKey: publicKeyHex });
+      const validator = await LicenseValidator.create(TEST_REALM, {
+        publicKey: publicKeyHex,
+      });
       const result = await validator.validate(token);
 
       expect(result.valid).toBe(true);
@@ -100,7 +120,9 @@ describe("timing validation", () => {
         nbf: futureTimestamp(3600),
       });
 
-      const validator = await LicenseValidator.create(TEST_REALM, { publicKey: publicKeyHex });
+      const validator = await LicenseValidator.create(TEST_REALM, {
+        publicKey: publicKeyHex,
+      });
       const result = await validator.validate(token);
 
       expect(result.valid).toBe(false);

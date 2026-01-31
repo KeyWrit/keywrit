@@ -2,9 +2,15 @@
  * Tests for domain checking
  */
 
-import { describe, test, expect } from "bun:test";
+import { describe, expect, test } from "vitest";
 import { LicenseValidator } from "../src/index.ts";
-import { createToken, publicKeyHex, futureTimestamp, pastTimestamp, TEST_REALM } from "./helpers.ts";
+import {
+  createToken,
+  futureTimestamp,
+  pastTimestamp,
+  publicKeyHex,
+  TEST_REALM,
+} from "./helpers.ts";
 
 describe("domain checking", () => {
   describe("checkDomain", () => {
@@ -15,7 +21,9 @@ describe("domain checking", () => {
         // No allowedDomains field
       });
 
-      const validator = await LicenseValidator.create(TEST_REALM, { publicKey: publicKeyHex });
+      const validator = await LicenseValidator.create(TEST_REALM, {
+        publicKey: publicKeyHex,
+      });
       const result = await validator.checkDomain(token, "example.com");
 
       expect(result.allowed).toBe(true);
@@ -29,7 +37,9 @@ describe("domain checking", () => {
         allowedDomains: ["example.com", "other.org"],
       });
 
-      const validator = await LicenseValidator.create(TEST_REALM, { publicKey: publicKeyHex });
+      const validator = await LicenseValidator.create(TEST_REALM, {
+        publicKey: publicKeyHex,
+      });
       const result = await validator.checkDomain(token, "example.com");
 
       expect(result.allowed).toBe(true);
@@ -43,11 +53,19 @@ describe("domain checking", () => {
         allowedDomains: ["*.example.com"],
       });
 
-      const validator = await LicenseValidator.create(TEST_REALM, { publicKey: publicKeyHex });
+      const validator = await LicenseValidator.create(TEST_REALM, {
+        publicKey: publicKeyHex,
+      });
 
-      expect((await validator.checkDomain(token, "app.example.com")).allowed).toBe(true);
-      expect((await validator.checkDomain(token, "staging.example.com")).allowed).toBe(true);
-      expect((await validator.checkDomain(token, "deep.nested.example.com")).allowed).toBe(true);
+      expect(
+        (await validator.checkDomain(token, "app.example.com")).allowed,
+      ).toBe(true);
+      expect(
+        (await validator.checkDomain(token, "staging.example.com")).allowed,
+      ).toBe(true);
+      expect(
+        (await validator.checkDomain(token, "deep.nested.example.com")).allowed,
+      ).toBe(true);
     });
 
     test("wildcard does not match root domain", async () => {
@@ -57,7 +75,9 @@ describe("domain checking", () => {
         allowedDomains: ["*.example.com"],
       });
 
-      const validator = await LicenseValidator.create(TEST_REALM, { publicKey: publicKeyHex });
+      const validator = await LicenseValidator.create(TEST_REALM, {
+        publicKey: publicKeyHex,
+      });
       const result = await validator.checkDomain(token, "example.com");
 
       expect(result.allowed).toBe(false);
@@ -71,7 +91,9 @@ describe("domain checking", () => {
         allowedDomains: ["example.com"],
       });
 
-      const validator = await LicenseValidator.create(TEST_REALM, { publicKey: publicKeyHex });
+      const validator = await LicenseValidator.create(TEST_REALM, {
+        publicKey: publicKeyHex,
+      });
       const result = await validator.checkDomain(token, "other.com");
 
       expect(result.allowed).toBe(false);
@@ -85,7 +107,9 @@ describe("domain checking", () => {
         allowedDomains: [],
       });
 
-      const validator = await LicenseValidator.create(TEST_REALM, { publicKey: publicKeyHex });
+      const validator = await LicenseValidator.create(TEST_REALM, {
+        publicKey: publicKeyHex,
+      });
       const result = await validator.checkDomain(token, "example.com");
 
       expect(result.allowed).toBe(false);
@@ -99,7 +123,9 @@ describe("domain checking", () => {
         allowedDomains: ["example.com"],
       });
 
-      const validator = await LicenseValidator.create(TEST_REALM, { publicKey: publicKeyHex });
+      const validator = await LicenseValidator.create(TEST_REALM, {
+        publicKey: publicKeyHex,
+      });
       const result = await validator.checkDomain(token, "example.com");
 
       expect(result.allowed).toBe(false);
@@ -107,8 +133,13 @@ describe("domain checking", () => {
     });
 
     test("returns invalid_token for invalid token", async () => {
-      const validator = await LicenseValidator.create(TEST_REALM, { publicKey: publicKeyHex });
-      const result = await validator.checkDomain("invalid-token", "example.com");
+      const validator = await LicenseValidator.create(TEST_REALM, {
+        publicKey: publicKeyHex,
+      });
+      const result = await validator.checkDomain(
+        "invalid-token",
+        "example.com",
+      );
 
       expect(result.allowed).toBe(false);
       expect(result.reason).toBe("invalid_token");
@@ -121,7 +152,9 @@ describe("domain checking", () => {
         allowedDomains: ["Example.COM"],
       });
 
-      const validator = await LicenseValidator.create(TEST_REALM, { publicKey: publicKeyHex });
+      const validator = await LicenseValidator.create(TEST_REALM, {
+        publicKey: publicKeyHex,
+      });
       const result = await validator.checkDomain(token, "example.com");
 
       expect(result.allowed).toBe(true);
@@ -136,7 +169,9 @@ describe("domain checking", () => {
         allowedDomains: ["example.com", "*.example.org"],
       });
 
-      const validator = await LicenseValidator.create(TEST_REALM, { publicKey: publicKeyHex });
+      const validator = await LicenseValidator.create(TEST_REALM, {
+        publicKey: publicKeyHex,
+      });
       const domains = await validator.getAllowedDomains(token);
 
       expect(domains).toEqual(["example.com", "*.example.org"]);
@@ -148,7 +183,9 @@ describe("domain checking", () => {
         exp: futureTimestamp(3600),
       });
 
-      const validator = await LicenseValidator.create(TEST_REALM, { publicKey: publicKeyHex });
+      const validator = await LicenseValidator.create(TEST_REALM, {
+        publicKey: publicKeyHex,
+      });
       const domains = await validator.getAllowedDomains(token);
 
       expect(domains).toBeUndefined();
@@ -161,14 +198,18 @@ describe("domain checking", () => {
         allowedDomains: [],
       });
 
-      const validator = await LicenseValidator.create(TEST_REALM, { publicKey: publicKeyHex });
+      const validator = await LicenseValidator.create(TEST_REALM, {
+        publicKey: publicKeyHex,
+      });
       const domains = await validator.getAllowedDomains(token);
 
       expect(domains).toEqual([]);
     });
 
     test("returns undefined for invalid token", async () => {
-      const validator = await LicenseValidator.create(TEST_REALM, { publicKey: publicKeyHex });
+      const validator = await LicenseValidator.create(TEST_REALM, {
+        publicKey: publicKeyHex,
+      });
       const domains = await validator.getAllowedDomains("invalid-token");
 
       expect(domains).toBeUndefined();

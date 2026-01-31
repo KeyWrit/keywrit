@@ -2,9 +2,9 @@
  * Tests for JWT decoding utilities
  */
 
-import { describe, test, expect } from "bun:test";
+import { describe, expect, test } from "vitest";
 import { decode, decodePayload } from "../src/index.ts";
-import { createToken, createRawToken, TEST_REALM } from "./helpers.ts";
+import { createRawToken, createToken, TEST_REALM } from "./helpers.ts";
 
 describe("decode", () => {
   test("decodes valid token", async () => {
@@ -38,7 +38,7 @@ describe("decode", () => {
   test("returns null for token without kwv", async () => {
     const token = await createRawToken(
       { alg: "EdDSA", typ: "JWT" }, // no kwv
-      { sub: "test" }
+      { sub: "test" },
     );
     expect(decode(token)).toBeNull();
   });
@@ -46,7 +46,7 @@ describe("decode", () => {
   test("returns null for token with unsupported kwv", async () => {
     const token = await createRawToken(
       { alg: "EdDSA", typ: "JWT", kwv: 999 },
-      { sub: "test" }
+      { sub: "test" },
     );
     expect(decode(token)).toBeNull();
   });
@@ -68,12 +68,15 @@ describe("decodePayload", () => {
   });
 
   test("extracts complex payload", async () => {
-    const token = await createToken({
-      sub: "user@example.com",
-      flags: ["export", "import"],
-      kind: "enterprise",
-      features: { region: "us-west" },
-    }, { aud: ["app1", "app2"] });
+    const token = await createToken(
+      {
+        sub: "user@example.com",
+        flags: ["export", "import"],
+        kind: "enterprise",
+        features: { region: "us-west" },
+      },
+      { aud: ["app1", "app2"] },
+    );
     const payload = decodePayload(token);
 
     expect(payload?.sub).toBe("user@example.com");

@@ -2,9 +2,14 @@
  * Tests for claim matchers (flags, kind, features)
  */
 
-import { describe, test, expect } from "bun:test";
+import { describe, expect, test } from "vitest";
 import { LicenseValidator } from "../src/index.ts";
-import { createToken, publicKeyHex, futureTimestamp, TEST_REALM } from "./helpers.ts";
+import {
+  createToken,
+  futureTimestamp,
+  publicKeyHex,
+  TEST_REALM,
+} from "./helpers.ts";
 
 describe("claim matchers", () => {
   describe("required flags", () => {
@@ -124,7 +129,11 @@ describe("claim matchers", () => {
     test("validates when all required features present", async () => {
       const token = await createToken({
         sub: "test",
-        features: { maxUsers: 100, region: "us-west", customBranding: true },
+        features: {
+          maxUsers: 100,
+          region: "us-west",
+          customBranding: true,
+        },
         exp: futureTimestamp(3600),
       });
 

@@ -2,10 +2,15 @@
  * Tests for signature verification
  */
 
-import { describe, test, expect } from "bun:test";
 import * as ed25519 from "@noble/ed25519";
+import { describe, expect, test } from "vitest";
 import { LicenseValidator } from "../src/index.ts";
-import { createToken, publicKeyHex, futureTimestamp, TEST_REALM } from "./helpers.ts";
+import {
+  createToken,
+  futureTimestamp,
+  publicKeyHex,
+  TEST_REALM,
+} from "./helpers.ts";
 
 describe("signature verification", () => {
   test("validates correct signature", async () => {
@@ -14,7 +19,9 @@ describe("signature verification", () => {
       exp: futureTimestamp(3600),
     });
 
-    const validator = await LicenseValidator.create(TEST_REALM, { publicKey: publicKeyHex });
+    const validator = await LicenseValidator.create(TEST_REALM, {
+      publicKey: publicKeyHex,
+    });
     const result = await validator.validate(token);
 
     expect(result.valid).toBe(true);
@@ -28,10 +35,12 @@ describe("signature verification", () => {
     const otherPrivate = ed25519.utils.randomSecretKey();
     const token = await createToken(
       { sub: "test", exp: futureTimestamp(3600) },
-      { privateKey: otherPrivate }
+      { privateKey: otherPrivate },
     );
 
-    const validator = await LicenseValidator.create(TEST_REALM, { publicKey: publicKeyHex });
+    const validator = await LicenseValidator.create(TEST_REALM, {
+      publicKey: publicKeyHex,
+    });
     const result = await validator.validate(token);
 
     expect(result.valid).toBe(false);
@@ -54,7 +63,9 @@ describe("signature verification", () => {
       .replace(/=/g, "");
     const tamperedToken = `${parts[0]}.${tamperedPayload}.${parts[2]}`;
 
-    const validator = await LicenseValidator.create(TEST_REALM, { publicKey: publicKeyHex });
+    const validator = await LicenseValidator.create(TEST_REALM, {
+      publicKey: publicKeyHex,
+    });
     const result = await validator.validate(tamperedToken);
 
     expect(result.valid).toBe(false);
@@ -67,10 +78,12 @@ describe("signature verification", () => {
     const otherPrivate = ed25519.utils.randomSecretKey();
     const token = await createToken(
       { sub: "test", kind: "pro", exp: futureTimestamp(3600) },
-      { privateKey: otherPrivate }
+      { privateKey: otherPrivate },
     );
 
-    const validator = await LicenseValidator.create(TEST_REALM, { publicKey: publicKeyHex });
+    const validator = await LicenseValidator.create(TEST_REALM, {
+      publicKey: publicKeyHex,
+    });
     const result = await validator.validate(token);
 
     expect(result.valid).toBe(false);
