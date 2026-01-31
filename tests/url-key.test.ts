@@ -5,108 +5,108 @@
 import { describe, expect, test, vi } from "vitest";
 import { LicenseValidator } from "../src/index.ts";
 import {
-  createToken,
-  futureTimestamp,
-  publicKeyHex,
-  TEST_REALM,
+    createToken,
+    futureTimestamp,
+    publicKeyHex,
+    TEST_REALM,
 } from "./helpers.ts";
 
 describe("public key from URL", () => {
-  test("creates validator from URL", async () => {
-    // Mock fetch to return the public key
-    const originalFetch = globalThis.fetch;
-    globalThis.fetch = vi.fn(async (url: string) => {
-      if (url === "https://example.com/public-key") {
-        return new Response(publicKeyHex, { status: 200 });
-      }
-      return new Response("Not found", { status: 404 });
-    }) as typeof fetch;
+    test("creates validator from URL", async () => {
+        // Mock fetch to return the public key
+        const originalFetch = globalThis.fetch;
+        globalThis.fetch = vi.fn(async (url: string) => {
+            if (url === "https://example.com/public-key") {
+                return new Response(publicKeyHex, { status: 200 });
+            }
+            return new Response("Not found", { status: 404 });
+        }) as typeof fetch;
 
-    try {
-      const validator = await LicenseValidator.create(TEST_REALM, {
-        publicKeyUrl: "https://example.com/public-key",
-      });
+        try {
+            const validator = await LicenseValidator.create(TEST_REALM, {
+                publicKeyUrl: "https://example.com/public-key",
+            });
 
-      const token = await createToken({
-        sub: "test-user",
-        exp: futureTimestamp(3600),
-      });
+            const token = await createToken({
+                sub: "test-user",
+                exp: futureTimestamp(3600),
+            });
 
-      const result = await validator.validate(token);
-      expect(result.valid).toBe(true);
-    } finally {
-      globalThis.fetch = originalFetch;
-    }
-  });
+            const result = await validator.validate(token);
+            expect(result.valid).toBe(true);
+        } finally {
+            globalThis.fetch = originalFetch;
+        }
+    });
 
-  test("handles whitespace in fetched key", async () => {
-    const originalFetch = globalThis.fetch;
-    globalThis.fetch = vi.fn(async () => {
-      return new Response(`  ${publicKeyHex}  \n`, { status: 200 });
-    }) as typeof fetch;
+    test("handles whitespace in fetched key", async () => {
+        const originalFetch = globalThis.fetch;
+        globalThis.fetch = vi.fn(async () => {
+            return new Response(`  ${publicKeyHex}  \n`, { status: 200 });
+        }) as typeof fetch;
 
-    try {
-      const validator = await LicenseValidator.create(TEST_REALM, {
-        publicKeyUrl: "https://example.com/public-key",
-      });
+        try {
+            const validator = await LicenseValidator.create(TEST_REALM, {
+                publicKeyUrl: "https://example.com/public-key",
+            });
 
-      const token = await createToken({
-        sub: "test-user",
-        exp: futureTimestamp(3600),
-      });
+            const token = await createToken({
+                sub: "test-user",
+                exp: futureTimestamp(3600),
+            });
 
-      const result = await validator.validate(token);
-      expect(result.valid).toBe(true);
-    } finally {
-      globalThis.fetch = originalFetch;
-    }
-  });
+            const result = await validator.validate(token);
+            expect(result.valid).toBe(true);
+        } finally {
+            globalThis.fetch = originalFetch;
+        }
+    });
 
-  test("throws on fetch failure", async () => {
-    const originalFetch = globalThis.fetch;
-    globalThis.fetch = vi.fn(async () => {
-      return new Response("Not found", {
-        status: 404,
-        statusText: "Not Found",
-      });
-    }) as typeof fetch;
+    test("throws on fetch failure", async () => {
+        const originalFetch = globalThis.fetch;
+        globalThis.fetch = vi.fn(async () => {
+            return new Response("Not found", {
+                status: 404,
+                statusText: "Not Found",
+            });
+        }) as typeof fetch;
 
-    try {
-      await expect(
-        LicenseValidator.create(TEST_REALM, {
-          publicKeyUrl: "https://example.com/missing-key",
-        }),
-      ).rejects.toThrow("Failed to fetch public key");
-    } finally {
-      globalThis.fetch = originalFetch;
-    }
-  });
+        try {
+            await expect(
+                LicenseValidator.create(TEST_REALM, {
+                    publicKeyUrl: "https://example.com/missing-key",
+                }),
+            ).rejects.toThrow("Failed to fetch public key");
+        } finally {
+            globalThis.fetch = originalFetch;
+        }
+    });
 
-  test("passes required flags from URL config", async () => {
-    const originalFetch = globalThis.fetch;
-    globalThis.fetch = vi.fn(async () => {
-      return new Response(publicKeyHex, { status: 200 });
-    }) as typeof fetch;
+    test("passes required flags from URL config", async () => {
+        const originalFetch = globalThis.fetch;
+        globalThis.fetch = vi.fn(async () => {
+            return new Response(publicKeyHex, { status: 200 });
+        }) as typeof fetch;
 
-    try {
-      const validator = await LicenseValidator.create(TEST_REALM, {
-        publicKeyUrl: "https://example.com/public-key",
-        requiredFlags: ["premium"],
-      });
+        try {
+            const validator = await LicenseValidator.create(TEST_REALM, {
+                publicKeyUrl: "https://example.com/public-key",
+                requiredFlags: ["premium"],
+            });
 
-      const token = await createToken({
-        sub: "test-user",
-        exp: futureTimestamp(3600),
-        flags: [],
-      });
+            const token = await createToken({
+                sub: "test-user",
+                exp: futureTimestamp(3600),
+                flags: [],
+            });
 
-      const result = await validator.validate(token);
-      expect(result.valid).toBe(false);
-      if (!result.valid) {
-        expect(result.error.code).toBe("MISSING_REQUIRED_FLAG");
-      }
-    } finally {
-      globalThis.fetch = originalFetch;
-    }
-  });
+            const result = await validator.validate(token);
+            expect(result.valid).toBe(false);
+            if (!result.valid) {
+                expect(result.error.code).toBe("MISSING_REQUIRED_FLAG");
+            }
+        } finally {
+            globalThis.fetch = originalFetch;
+        }
+    });
 });

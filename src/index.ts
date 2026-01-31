@@ -3,42 +3,42 @@
 
 // Constants
 export {
-  KEYWRIT_ISSUER,
-  KEYWRIT_VERSION,
-  SUPPORTED_VERSIONS,
+    KEYWRIT_ISSUER,
+    KEYWRIT_VERSION,
+    SUPPORTED_VERSIONS,
 } from "./constants.ts";
 // Utility functions
 export { decode, decodePayload } from "./jwt/decode.ts";
 // Types
 export type {
-  DecodedJWT,
-  DomainCheckResult,
-  ExpirationInfo,
-  // Flag checking
-  FlagCheckResult,
-  // JWT structure
-  JWTHeader,
-  LicenseClaims,
-  LicensePayload,
-  // Configuration
-  PublicKeyInput,
-  RevocationList,
-  StandardClaims,
-  TimingOptions,
-  ValidationError,
-  ValidationErrorCode,
-  ValidationFailure,
-  // Validation results
-  ValidationResult,
-  ValidationSuccess,
-  ValidationWarning,
-  ValidationWarningCode,
-  ValidatorConfig,
+    DecodedJWT,
+    DomainCheckResult,
+    ExpirationInfo,
+    // Flag checking
+    FlagCheckResult,
+    // JWT structure
+    JWTHeader,
+    LicenseClaims,
+    LicensePayload,
+    // Configuration
+    PublicKeyInput,
+    RevocationList,
+    StandardClaims,
+    TimingOptions,
+    ValidationError,
+    ValidationErrorCode,
+    ValidationFailure,
+    // Validation results
+    ValidationResult,
+    ValidationSuccess,
+    ValidationWarning,
+    ValidationWarningCode,
+    ValidatorConfig,
 } from "./types/index.ts";
 export {
-  LicenseValidator,
-  LicenseValidatorBound,
-  LicenseValidatorUnbound,
+    LicenseValidator,
+    LicenseValidatorBound,
+    LicenseValidatorUnbound,
 } from "./validators/index.ts";
 
 import type { ValidationResult, ValidatorConfig } from "./types/index.ts";
@@ -56,12 +56,12 @@ import { LicenseValidator } from "./validators/index.ts";
  * ```
  */
 export async function validateLicense<T = Record<string, unknown>>(
-  realm: string,
-  token: string,
-  config: ValidatorConfig,
+    realm: string,
+    token: string,
+    config: ValidatorConfig,
 ): Promise<ValidationResult<T>> {
-  const validator = await LicenseValidator.create<T>(realm, config);
-  return validator.validate(token);
+    const validator = await LicenseValidator.create<T>(realm, config);
+    return validator.validate(token);
 }
 
 /**
@@ -77,9 +77,9 @@ export async function validateLicense<T = Record<string, unknown>>(
  * ```
  */
 export async function createValidator<T = Record<string, unknown>>(
-  realm: string,
-  config: ValidatorConfig,
+    realm: string,
+    config: ValidatorConfig,
 ): Promise<(token: string) => Promise<ValidationResult<T>>> {
-  const validator = await LicenseValidator.create<T>(realm, config);
-  return (token: string) => validator.validate(token);
+    const validator = await LicenseValidator.create<T>(realm, config);
+    return (token: string) => validator.validate(token);
 }

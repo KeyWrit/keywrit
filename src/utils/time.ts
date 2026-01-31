@@ -9,55 +9,55 @@ export const DEFAULT_CLOCK_SKEW = 60;
  * Get current Unix timestamp in seconds
  */
 export function now(): number {
-  return Math.floor(Date.now() / 1000);
+    return Math.floor(Date.now() / 1000);
 }
 
 /**
  * Check if a timestamp is in the past (with optional clock skew)
  */
 export function isPast(
-  timestamp: number,
-  currentTime?: number,
-  clockSkew = 0,
+    timestamp: number,
+    currentTime?: number,
+    clockSkew = 0,
 ): boolean {
-  const time = currentTime ?? now();
-  return timestamp < time - clockSkew;
+    const time = currentTime ?? now();
+    return timestamp < time - clockSkew;
 }
 
 /**
  * Check if a timestamp is in the future (with optional clock skew)
  */
 export function isFuture(
-  timestamp: number,
-  currentTime?: number,
-  clockSkew = 0,
+    timestamp: number,
+    currentTime?: number,
+    clockSkew = 0,
 ): boolean {
-  const time = currentTime ?? now();
-  return timestamp > time + clockSkew;
+    const time = currentTime ?? now();
+    return timestamp > time + clockSkew;
 }
 
 /**
  * Format seconds into human-readable duration
  */
 export function formatDuration(seconds: number): string {
-  const absSeconds = Math.abs(seconds);
+    const absSeconds = Math.abs(seconds);
 
-  if (absSeconds < 60) {
-    return `${absSeconds} second${absSeconds !== 1 ? "s" : ""}`;
-  }
+    if (absSeconds < 60) {
+        return `${absSeconds} second${absSeconds !== 1 ? "s" : ""}`;
+    }
 
-  if (absSeconds < 3600) {
-    const minutes = Math.floor(absSeconds / 60);
-    return `${minutes} minute${minutes !== 1 ? "s" : ""}`;
-  }
+    if (absSeconds < 3600) {
+        const minutes = Math.floor(absSeconds / 60);
+        return `${minutes} minute${minutes !== 1 ? "s" : ""}`;
+    }
 
-  if (absSeconds < 86400) {
-    const hours = Math.floor(absSeconds / 3600);
-    return `${hours} hour${hours !== 1 ? "s" : ""}`;
-  }
+    if (absSeconds < 86400) {
+        const hours = Math.floor(absSeconds / 3600);
+        return `${hours} hour${hours !== 1 ? "s" : ""}`;
+    }
 
-  const days = Math.floor(absSeconds / 86400);
-  return `${days} day${days !== 1 ? "s" : ""}`;
+    const days = Math.floor(absSeconds / 86400);
+    return `${days} day${days !== 1 ? "s" : ""}`;
 }
 
 /** Threshold for "expiring soon" warning (7 days in seconds) */
@@ -67,21 +67,21 @@ export const EXPIRING_SOON_THRESHOLD = 7 * 24 * 60 * 60;
  * Check if token is expiring soon
  */
 export function isExpiringSoon(
-  exp: number,
-  currentTime?: number,
-  threshold = EXPIRING_SOON_THRESHOLD,
+    exp: number,
+    currentTime?: number,
+    threshold = EXPIRING_SOON_THRESHOLD,
 ): boolean {
-  const time = currentTime ?? now();
-  const remaining = exp - time;
-  return remaining > 0 && remaining <= threshold;
+    const time = currentTime ?? now();
+    const remaining = exp - time;
+    return remaining > 0 && remaining <= threshold;
 }
 
 /** Expiration info result */
 export interface ExpirationInfoResult {
-  expiresAt: number | null;
-  isExpired: boolean;
-  secondsRemaining: number | null;
-  timeRemaining: string | null;
+    expiresAt: number | null;
+    isExpired: boolean;
+    secondsRemaining: number | null;
+    timeRemaining: string | null;
 }
 
 /**
@@ -90,26 +90,26 @@ export interface ExpirationInfoResult {
  * @param currentTime - Optional current time override for testing
  */
 export function computeExpirationInfo(
-  exp: number | undefined,
-  currentTime?: number,
+    exp: number | undefined,
+    currentTime?: number,
 ): ExpirationInfoResult {
-  if (exp === undefined) {
+    if (exp === undefined) {
+        return {
+            expiresAt: null,
+            isExpired: false,
+            secondsRemaining: null,
+            timeRemaining: null,
+        };
+    }
+
+    const time = currentTime ?? now();
+    const secondsRemaining = exp - time;
+    const isExpired = secondsRemaining <= 0;
+
     return {
-      expiresAt: null,
-      isExpired: false,
-      secondsRemaining: null,
-      timeRemaining: null,
+        expiresAt: exp,
+        isExpired,
+        secondsRemaining,
+        timeRemaining: formatDuration(Math.abs(secondsRemaining)),
     };
-  }
-
-  const time = currentTime ?? now();
-  const secondsRemaining = exp - time;
-  const isExpired = secondsRemaining <= 0;
-
-  return {
-    expiresAt: exp,
-    isExpired,
-    secondsRemaining,
-    timeRemaining: formatDuration(Math.abs(secondsRemaining)),
-  };
 }

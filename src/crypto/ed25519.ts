@@ -14,16 +14,16 @@ import { verifyAsync as nobleVerifyAsync } from "@noble/ed25519";
  * @returns Promise<boolean> - true if signature is valid
  */
 export async function verify(
-  signature: Uint8Array,
-  message: Uint8Array,
-  publicKey: Uint8Array,
+    signature: Uint8Array,
+    message: Uint8Array,
+    publicKey: Uint8Array,
 ): Promise<boolean> {
-  try {
-    return await nobleVerifyAsync(signature, message, publicKey);
-  } catch {
-    // Invalid signature format or other crypto errors
-    return false;
-  }
+    try {
+        return await nobleVerifyAsync(signature, message, publicKey);
+    } catch {
+        // Invalid signature format or other crypto errors
+        return false;
+    }
 }
 
 /**
@@ -32,22 +32,22 @@ export async function verify(
  * This falls back to async internally
  */
 export function verifySync(
-  signature: Uint8Array,
-  message: Uint8Array,
-  publicKey: Uint8Array,
+    signature: Uint8Array,
+    message: Uint8Array,
+    publicKey: Uint8Array,
 ): boolean {
-  // @noble/ed25519 v2+ async by default
-  // For sync, we need to configure sha512Sync
-  // Since we want to support both browser and Node, we'll use the sync import if available
-  try {
-    // Try sync verification if available
-    const { verify: syncVerify } = require("@noble/ed25519");
-    // The library may throw if sync is not configured
-    return syncVerify(signature, message, publicKey) as boolean;
-  } catch {
-    // If sync fails, this is a configuration issue
-    throw new Error(
-      "Synchronous verification not available. Use async verify() instead.",
-    );
-  }
+    // @noble/ed25519 v2+ async by default
+    // For sync, we need to configure sha512Sync
+    // Since we want to support both browser and Node, we'll use the sync import if available
+    try {
+        // Try sync verification if available
+        const { verify: syncVerify } = require("@noble/ed25519");
+        // The library may throw if sync is not configured
+        return syncVerify(signature, message, publicKey) as boolean;
+    } catch {
+        // If sync fails, this is a configuration issue
+        throw new Error(
+            "Synchronous verification not available. Use async verify() instead.",
+        );
+    }
 }

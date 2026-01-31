@@ -1,62 +1,62 @@
 {
-  "name": "keywrit",
-  "version": "0.0.3",
-  "description": "Public key software license validator",
-  "type": "module",
-  "license": "MIT",
-  "author": "Diego Barreiro Perez <diego@barreiro.dev>",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/KeyWrit/keywrit.git"
-  },
-  "homepage": "https://keywrit.github.io/docs/",
-  "bugs": "https://github.com/KeyWrit/keywrit/issues",
-  "keywords": [
-    "license",
-    "validation",
-    "ed25519",
-    "jwt"
-  ],
-  "main": "dist/index.cjs",
-  "module": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "unpkg": "dist/index.global.js",
-  "jsdelivr": "dist/index.global.js",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+    "name": "keywrit",
+    "version": "0.0.3",
+    "description": "Public key software license validator",
+    "type": "module",
+    "license": "MIT",
+    "author": "Diego Barreiro Perez <diego@barreiro.dev>",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/KeyWrit/keywrit.git"
+    },
+    "homepage": "https://keywrit.github.io/docs/",
+    "bugs": "https://github.com/KeyWrit/keywrit/issues",
+    "keywords": [
+        "license",
+        "validation",
+        "ed25519",
+        "jwt"
+    ],
+    "main": "dist/index.cjs",
+    "module": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "unpkg": "dist/index.global.js",
+    "jsdelivr": "dist/index.global.js",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js",
+            "require": "./dist/index.cjs"
+        }
+    },
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "prepublishOnly": "bun run check && bun run build",
+        "build": "bunup",
+        "dev": "bunup --watch",
+        "test": "vitest",
+        "test:run": "vitest run",
+        "test:coverage": "vitest run --coverage",
+        "typecheck": "tsc --noEmit",
+        "format": "biome format --write .",
+        "format:check": "biome format .",
+        "lint": "biome lint .",
+        "lint:fix": "biome lint --write .",
+        "check": "bun run lint && bun run typecheck && bun run test:run"
+    },
+    "dependencies": {
+        "@noble/ed25519": "^3.0.0"
+    },
+    "devDependencies": {
+        "@biomejs/biome": "^2.3.13",
+        "@types/bun": "latest",
+        "@vitest/coverage-v8": "^4.0.18",
+        "bunup": "^0.16.22",
+        "vitest": "^4.0.18"
+    },
+    "peerDependencies": {
+        "typescript": "^5.9.3"
     }
-  },
-  "files": [
-    "dist"
-  ],
-  "scripts": {
-    "prepublishOnly": "bun run check && bun run build",
-    "build": "bunup",
-    "dev": "bunup --watch",
-    "test": "vitest",
-    "test:run": "vitest run",
-    "test:coverage": "vitest run --coverage",
-    "typecheck": "tsc --noEmit",
-    "format": "biome format --write .",
-    "format:check": "biome format .",
-    "lint": "biome lint .",
-    "lint:fix": "biome lint --write .",
-    "check": "bun run lint && bun run typecheck && bun run test:run"
-  },
-  "dependencies": {
-    "@noble/ed25519": "^3.0.0"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "^2.3.13",
-    "@types/bun": "latest",
-    "@vitest/coverage-v8": "^4.0.18",
-    "bunup": "^0.16.22",
-    "vitest": "^4.0.18"
-  },
-  "peerDependencies": {
-    "typescript": "^5.9.3"
-  }
 }
