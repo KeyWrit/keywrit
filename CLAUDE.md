@@ -2,6 +2,14 @@
 
 See @README.md for project overview and @CONTRIBUTING.md for development setup.
 
+## Package Manager
+
+Use `bun` to run any command.
+
+## After Commits
+
+Always run `bun run check` after making changes. This runs linting (Biome), type checking, and tests.
+
 ## Architecture
 
 - **validators/** - Core validation logic with bound/unbound patterns
@@ -12,7 +20,7 @@ See @README.md for project overview and @CONTRIBUTING.md for development setup.
 
 ## Testing
 
-Uses Bun test runner. Run with `bun test`.
+Uses Vitest. Run with `bun run test` (watch mode) or `bun run test:run` (single run).
 
 Test files are in `tests/` directory.
 

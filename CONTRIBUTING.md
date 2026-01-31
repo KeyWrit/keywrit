@@ -15,11 +15,16 @@ bun install
 ## Development Commands
 
 ```bash
-bun test           # Run tests
-bun run typecheck  # Type check with TypeScript
-bun run build      # Build with bunup
-bun run dev        # Build in watch mode
-bun run coverage   # Run tests with coverage
+bun run test          # Run tests (watch mode)
+bun run test:run      # Run tests once
+bun run test:coverage # Run tests with coverage
+bun run typecheck     # Type check with TypeScript
+bun run format        # Format code with Biome
+bun run lint          # Run linter
+bun run lint:fix      # Auto-fix linting issues
+bun run check         # Run all checks (lint + typecheck + tests)
+bun run build         # Build with bunup
+bun run dev           # Build in watch mode
 ```
 
 ## Project Structure
@@ -63,5 +68,5 @@ src/
 1. Fork the repository
 2. Create a feature branch from `main`
 3. Make your changes
-4. Run `bun test` and `bun run typecheck`
+4. Run `bun run check` to verify linting, types, and tests pass
 5. Submit a pull request with a clear description
