@@ -1,6 +1,6 @@
 // Main validator classes
 // LicenseValidator is exported as the main entry point with static factory methods
-export { LicenseValidatorUnbound as LicenseValidator } from "./validator-unbound.ts";
+export { LicenseValidator } from "./validator.ts";
 export { LicenseValidatorUnbound } from "./validator-unbound.ts";
 export { LicenseValidatorBound } from "./validator-bound.ts";
 
@@ -42,7 +42,7 @@ export type {
 export { decode, decodePayload } from "./jwt/decode.ts";
 
 // One-shot validation function
-import { LicenseValidatorUnbound } from "./validator-unbound.ts";
+import { LicenseValidator } from "./validator.ts";
 import type { ValidatorConfig, ValidationResult } from "./types/index.ts";
 
 /**
@@ -60,7 +60,7 @@ export async function validateLicense<T = Record<string, unknown>>(
   token: string,
   config: ValidatorConfig
 ): Promise<ValidationResult<T>> {
-  const validator = await LicenseValidatorUnbound.create<T>(realm, config);
+  const validator = await LicenseValidator.create<T>(realm, config);
   return validator.validate(token);
 }
 
@@ -80,6 +80,6 @@ export async function createValidator<T = Record<string, unknown>>(
   realm: string,
   config: ValidatorConfig
 ): Promise<(token: string) => Promise<ValidationResult<T>>> {
-  const validator = await LicenseValidatorUnbound.create<T>(realm, config);
+  const validator = await LicenseValidator.create<T>(realm, config);
   return (token: string) => validator.validate(token);
 }

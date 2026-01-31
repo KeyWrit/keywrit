@@ -10,10 +10,11 @@ import type {
   ExpirationInfo,
   DomainCheckResult,
 } from "./types/index.ts";
-import { LicenseValidator, resolvePublicKey } from "./validator.ts";
+import { LicenseValidator } from "./validator.ts";
 import { LicenseValidatorBound } from "./validator-bound.ts";
 import { decodePayload } from "./jwt/decode.ts";
-import { now, formatDuration } from "./utils/time.ts";
+import { computeExpirationInfo } from "./utils/time.ts";
+import { isDomainAllowed } from "./utils/domain.ts";
 
 /**
  * Unbound license validator - validates tokens on demand.
@@ -27,32 +28,6 @@ export class LicenseValidatorUnbound<T = Record<string, unknown>> extends Licens
     config: ValidatorConfig
   ) {
     super(realm, publicKey, config);
-  }
-
-  /**
-   * Create an unbound validator for on-demand validation.
-   * Returns a validator where methods require the token as a parameter.
-   */
-  public static async create<T = Record<string, unknown>>(
-    realm: string,
-    config: ValidatorConfig
-  ): Promise<LicenseValidatorUnbound<T>> {
-    const publicKey = await resolvePublicKey(config);
-    return new LicenseValidatorUnbound<T>(realm, publicKey, config);
-  }
-
-  /**
-   * Create a bound validator with a pre-validated token.
-   * Returns a validator with sync methods that operate on the bound token.
-   */
-  public static async createWithToken<T = Record<string, unknown>>(
-    realm: string,
-    config: ValidatorConfig,
-    token: string
-  ): Promise<LicenseValidatorBound<T>> {
-    const publicKey = await resolvePublicKey(config);
-    const unbound = new LicenseValidatorUnbound<T>(realm, publicKey, config);
-    return unbound.bind(token);
   }
 
   /**
@@ -236,28 +211,7 @@ export class LicenseValidatorUnbound<T = Record<string, unknown>> extends Licens
     if (!payload) {
       return null;
     }
-
-    const currentTime = this.timing?.currentTime ?? now();
-    const exp = payload.exp;
-
-    if (exp === undefined) {
-      return {
-        expiresAt: null,
-        isExpired: false,
-        secondsRemaining: null,
-        timeRemaining: null,
-      };
-    }
-
-    const secondsRemaining = exp - currentTime;
-    const isExpired = secondsRemaining <= 0;
-
-    return {
-      expiresAt: exp,
-      isExpired,
-      secondsRemaining,
-      timeRemaining: formatDuration(Math.abs(secondsRemaining)),
-    };
+    return computeExpirationInfo(payload.exp, this.timing?.currentTime);
   }
 
   /**
@@ -274,57 +228,4 @@ export class LicenseValidatorUnbound<T = Record<string, unknown>> extends Licens
       result
     );
   }
-
-  /**
-   * Build a config object from the current validator's settings
-   */
-  protected buildConfig(): ValidatorConfig {
-    const base = {
-      requiredFlags: this.requiredFlags,
-      requiredKind: this.requiredKind,
-      requiredFeatures: this.requiredFeatures,
-      timing: this.timing,
-      allowNoExpiration: this.allowNoExpiration,
-      publicKey: this.publicKey,
-    };
-
-    if (this.revocationUrl) {
-      return { ...base, revocationUrl: this.revocationUrl };
-    } else if (this.revocation) {
-      return { ...base, revocation: this.revocation };
-    }
-    return base;
-  }
-}
-
-/**
- * Check if a hostname matches a domain pattern.
- * Supports wildcards: "*.example.org" matches "foo.example.org", "bar.baz.example.org"
- */
-function matchesDomain(hostname: string, pattern: string): boolean {
-  const normalizedHost = hostname.toLowerCase();
-  const normalizedPattern = pattern.toLowerCase();
-
-  if (normalizedHost === normalizedPattern) {
-    return true;
-  }
-
-  if (normalizedPattern.startsWith("*.")) {
-    const suffix = normalizedPattern.slice(1); // ".example.org"
-    if (normalizedHost.endsWith(suffix) && normalizedHost.length > suffix.length) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-/**
- * Check if a hostname is allowed by any of the domain patterns.
- */
-function isDomainAllowed(hostname: string, allowedDomains: string[]): boolean {
-  if (allowedDomains.length === 0) {
-    return false;
-  }
-  return allowedDomains.some((pattern) => matchesDomain(hostname, pattern));
 }

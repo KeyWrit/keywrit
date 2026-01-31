@@ -75,3 +75,41 @@ export function isExpiringSoon(
   const remaining = exp - time;
   return remaining > 0 && remaining <= threshold;
 }
+
+/** Expiration info result */
+export interface ExpirationInfoResult {
+  expiresAt: number | null;
+  isExpired: boolean;
+  secondsRemaining: number | null;
+  timeRemaining: string | null;
+}
+
+/**
+ * Compute expiration information from an expiration timestamp.
+ * @param exp - Expiration timestamp (undefined if no expiration)
+ * @param currentTime - Optional current time override for testing
+ */
+export function computeExpirationInfo(
+  exp: number | undefined,
+  currentTime?: number
+): ExpirationInfoResult {
+  if (exp === undefined) {
+    return {
+      expiresAt: null,
+      isExpired: false,
+      secondsRemaining: null,
+      timeRemaining: null,
+    };
+  }
+
+  const time = currentTime ?? now();
+  const secondsRemaining = exp - time;
+  const isExpired = secondsRemaining <= 0;
+
+  return {
+    expiresAt: exp,
+    isExpired,
+    secondsRemaining,
+    timeRemaining: formatDuration(Math.abs(secondsRemaining)),
+  };
+}

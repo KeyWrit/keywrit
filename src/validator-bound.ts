@@ -10,29 +10,9 @@ import type {
   ExpirationInfo,
 } from "./types/index.ts";
 import { LicenseValidator } from "./validator.ts";
-import { now, formatDuration } from "./utils/time.ts";
-
-/**
- * Check if a hostname matches a domain pattern.
- * Supports wildcards: "*.example.org" matches "foo.example.org", "bar.baz.example.org"
- */
-function matchesDomain(hostname: string, pattern: string): boolean {
-  const normalizedHost = hostname.toLowerCase();
-  const normalizedPattern = pattern.toLowerCase();
-
-  if (normalizedHost === normalizedPattern) {
-    return true;
-  }
-
-  if (normalizedPattern.startsWith("*.")) {
-    const suffix = normalizedPattern.slice(1); // ".example.org"
-    if (normalizedHost.endsWith(suffix) && normalizedHost.length > suffix.length) {
-      return true;
-    }
-  }
-
-  return false;
-}
+import { LicenseValidatorUnbound } from "./validator-unbound.ts";
+import { computeExpirationInfo } from "./utils/time.ts";
+import { isDomainAllowed as checkDomainMatch } from "./utils/domain.ts";
 
 /**
  * Bound license validator - pre-validated token with sync access.
@@ -184,13 +164,8 @@ export class LicenseValidatorBound<T = Record<string, unknown>> extends LicenseV
       return true;
     }
 
-    // Empty array means no domains are allowed
-    if (allowedDomains.length === 0) {
-      return false;
-    }
-
-    // Check if hostname matches any allowed pattern
-    return allowedDomains.some((pattern) => matchesDomain(hostname, pattern));
+    // Check if hostname matches any allowed pattern (handles empty array case)
+    return checkDomainMatch(hostname, allowedDomains);
   }
 
   /**
@@ -211,28 +186,7 @@ export class LicenseValidatorBound<T = Record<string, unknown>> extends LicenseV
     if (!this.result.valid) {
       return null;
     }
-
-    const currentTime = this.timing?.currentTime ?? now();
-    const exp = this.result.license.exp;
-
-    if (exp === undefined) {
-      return {
-        expiresAt: null,
-        isExpired: false,
-        secondsRemaining: null,
-        timeRemaining: null,
-      };
-    }
-
-    const secondsRemaining = exp - currentTime;
-    const isExpired = secondsRemaining <= 0;
-
-    return {
-      expiresAt: exp,
-      isExpired,
-      secondsRemaining,
-      timeRemaining: formatDuration(Math.abs(secondsRemaining)),
-    };
+    return computeExpirationInfo(this.result.license.exp, this.timing?.currentTime);
   }
 
   /**
@@ -252,23 +206,14 @@ export class LicenseValidatorBound<T = Record<string, unknown>> extends LicenseV
   }
 
   /**
-   * Build a config object from the current validator's settings
+   * Unbind this validator, returning an unbound validator.
+   * Useful when you need to validate different tokens with the same configuration.
    */
-  protected buildConfig(): ValidatorConfig {
-    const base = {
-      requiredFlags: this.requiredFlags,
-      requiredKind: this.requiredKind,
-      requiredFeatures: this.requiredFeatures,
-      timing: this.timing,
-      allowNoExpiration: this.allowNoExpiration,
-      publicKey: this.publicKey,
-    };
-
-    if (this.revocationUrl) {
-      return { ...base, revocationUrl: this.revocationUrl };
-    } else if (this.revocation) {
-      return { ...base, revocation: this.revocation };
-    }
-    return base;
+  public unbind(): LicenseValidatorUnbound<T> {
+    return new LicenseValidatorUnbound<T>(
+      this.realm,
+      this.publicKey,
+      this.buildConfig()
+    );
   }
 }

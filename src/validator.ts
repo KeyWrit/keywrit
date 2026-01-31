@@ -16,6 +16,8 @@ import { validateTimingClaims, validateClaimMatchers } from "./jwt/claims.ts";
 import { validateInternalClaims } from "./jwt/internal-claims.ts";
 import { normalizePublicKey } from "./utils/keys.ts";
 import { malformedToken, invalidHeader, invalidPayload } from "./errors.ts";
+import type { LicenseValidatorUnbound } from "./validator-unbound.ts";
+import type { LicenseValidatorBound } from "./validator-bound.ts";
 
 /**
  * Abstract base class for license validation.
@@ -222,6 +224,55 @@ export abstract class LicenseValidator<T = Record<string, unknown>> {
     } catch {
       return null;
     }
+  }
+
+  /**
+   * Build a config object from the current validator's settings.
+   * Used when creating bound validators from unbound ones.
+   */
+  protected buildConfig(): ValidatorConfig {
+    const base = {
+      requiredFlags: this.requiredFlags,
+      requiredKind: this.requiredKind,
+      requiredFeatures: this.requiredFeatures,
+      timing: this.timing,
+      allowNoExpiration: this.allowNoExpiration,
+      publicKey: this.publicKey,
+    };
+
+    if (this.revocationUrl) {
+      return { ...base, revocationUrl: this.revocationUrl };
+    } else if (this.revocation) {
+      return { ...base, revocation: this.revocation };
+    }
+    return base;
+  }
+
+  /**
+   * Create an unbound validator for on-demand validation.
+   * Returns a validator where methods require the token as a parameter.
+   */
+  public static async create<T = Record<string, unknown>>(
+    realm: string,
+    config: ValidatorConfig
+  ): Promise<LicenseValidatorUnbound<T>> {
+    // Dynamic import to avoid circular dependency
+    const { LicenseValidatorUnbound: Unbound } = await import("./validator-unbound.ts");
+    const publicKey = await resolvePublicKey(config);
+    return new Unbound<T>(realm, publicKey, config);
+  }
+
+  /**
+   * Create a bound validator with a pre-validated token.
+   * Returns a validator with synchronous methods for accessing license data.
+   */
+  public static async createWithToken<T = Record<string, unknown>>(
+    realm: string,
+    config: ValidatorConfig,
+    token: string
+  ): Promise<LicenseValidatorBound<T>> {
+    const unbound = await LicenseValidator.create<T>(realm, config);
+    return unbound.bind(token);
   }
 }
 
