@@ -5,6 +5,9 @@
 /** The issuer value for all KeyWrit tokens */
 export const KEYWRIT_ISSUER = "keywrit";
 
+/** The JWT type for KeyWrit License tokens */
+export const KEYWRIT_TYPE = "KWL";
+
 /** Current KeyWrit token version */
 export const KEYWRIT_VERSION = 1;
 

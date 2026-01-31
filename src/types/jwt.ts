@@ -5,7 +5,8 @@
 /** JWT Header for EdDSA tokens */
 export interface JWTHeader {
     alg: "EdDSA";
-    typ: "JWT";
+    /** KeyWrit License type */
+    typ: "KWL";
     /** KeyWrit version */
     kwv: number;
 }

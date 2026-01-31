@@ -4,6 +4,7 @@
 // Constants
 export {
     KEYWRIT_ISSUER,
+    KEYWRIT_TYPE,
     KEYWRIT_VERSION,
     SUPPORTED_VERSIONS,
 } from "./constants.ts";

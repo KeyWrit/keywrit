@@ -3,6 +3,7 @@
  */
 
 import { describe, expect, test } from "vitest";
+import { KEYWRIT_TYPE } from "../src/constants.ts";
 import {
     createValidator,
     LicenseValidator,
@@ -232,7 +233,7 @@ describe("internal claim validation", () => {
         test("rejects token with missing issuer", async () => {
             // Use raw token to skip iss default
             const token = await createRawToken(
-                { alg: "EdDSA", typ: "JWT", kwv: 1 },
+                { alg: "EdDSA", typ: KEYWRIT_TYPE, kwv: 1 },
                 { sub: "test", aud: TEST_REALM, exp: futureTimestamp(3600) },
             );
 
@@ -289,7 +290,7 @@ describe("internal claim validation", () => {
         test("rejects token with missing audience", async () => {
             // Use raw token to skip aud default
             const token = await createRawToken(
-                { alg: "EdDSA", typ: "JWT", kwv: 1 },
+                { alg: "EdDSA", typ: KEYWRIT_TYPE, kwv: 1 },
                 { iss: "keywrit", sub: "test", exp: futureTimestamp(3600) },
             );
 
@@ -308,7 +309,7 @@ describe("internal claim validation", () => {
     describe("version validation", () => {
         test("rejects token without kwv header", async () => {
             const token = await createRawToken(
-                { alg: "EdDSA", typ: "JWT" },
+                { alg: "EdDSA", typ: KEYWRIT_TYPE },
                 {
                     iss: "keywrit",
                     aud: TEST_REALM,
@@ -331,7 +332,7 @@ describe("internal claim validation", () => {
 
         test("rejects token with unsupported version", async () => {
             const token = await createRawToken(
-                { alg: "EdDSA", typ: "JWT", kwv: 999 },
+                { alg: "EdDSA", typ: KEYWRIT_TYPE, kwv: 999 },
                 {
                     iss: "keywrit",
                     aud: TEST_REALM,

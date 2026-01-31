@@ -3,6 +3,7 @@
  */
 
 import { describe, expect, test } from "vitest";
+import { KEYWRIT_TYPE } from "../src/constants.ts";
 import { decode, decodePayload } from "../src/index.ts";
 import { createRawToken, createToken, TEST_REALM } from "./helpers.ts";
 
@@ -13,7 +14,7 @@ describe("decode", () => {
 
         expect(decoded).not.toBeNull();
         expect(decoded?.header.alg).toBe("EdDSA");
-        expect(decoded?.header.typ).toBe("JWT");
+        expect(decoded?.header.typ).toBe(KEYWRIT_TYPE);
         expect(decoded?.header.kwv).toBe(1);
         expect(decoded?.payload.sub).toBe("user@example.com");
         expect(decoded?.payload.iss).toBe("keywrit");
@@ -37,7 +38,7 @@ describe("decode", () => {
 
     test("returns null for token without kwv", async () => {
         const token = await createRawToken(
-            { alg: "EdDSA", typ: "JWT" }, // no kwv
+            { alg: "EdDSA", typ: KEYWRIT_TYPE }, // no kwv
             { sub: "test" },
         );
         expect(decode(token)).toBeNull();
@@ -45,7 +46,7 @@ describe("decode", () => {
 
     test("returns null for token with unsupported kwv", async () => {
         const token = await createRawToken(
-            { alg: "EdDSA", typ: "JWT", kwv: 999 },
+            { alg: "EdDSA", typ: KEYWRIT_TYPE, kwv: 999 },
             { sub: "test" },
         );
         expect(decode(token)).toBeNull();

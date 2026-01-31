@@ -4,7 +4,11 @@
 
 import * as ed25519 from "@noble/ed25519";
 import { beforeAll } from "vitest";
-import { KEYWRIT_ISSUER, KEYWRIT_VERSION } from "../src/constants.ts";
+import {
+    KEYWRIT_ISSUER,
+    KEYWRIT_TYPE,
+    KEYWRIT_VERSION,
+} from "../src/constants.ts";
 import { encode as base64urlEncode } from "../src/utils/base64url.ts";
 
 // Test key pair (generated once)
@@ -48,7 +52,7 @@ export async function createToken(
     // Build header with KeyWrit version
     const header = options?.header ?? {
         alg: "EdDSA",
-        typ: "JWT",
+        typ: KEYWRIT_TYPE,
         kwv: options?.kwv ?? KEYWRIT_VERSION,
     };
 

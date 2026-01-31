@@ -2,7 +2,7 @@
  * JWT decoding utilities
  */
 
-import { SUPPORTED_VERSIONS } from "../constants.ts";
+import { KEYWRIT_TYPE, SUPPORTED_VERSIONS } from "../constants.ts";
 import type { DecodedJWT, JWTHeader, LicensePayload } from "../types/index.ts";
 import { decode as base64urlDecode, decodeString } from "../utils/base64url.ts";
 
@@ -49,10 +49,10 @@ export function decodeJWT<T = Record<string, unknown>>(
             error: `Invalid algorithm: expected EdDSA, got ${header.alg}`,
         };
     }
-    if (header.typ !== "JWT") {
+    if (header.typ !== KEYWRIT_TYPE) {
         return {
             success: false,
-            error: `Invalid type: expected JWT, got ${header.typ}`,
+            error: `Invalid type: expected ${KEYWRIT_TYPE}, got ${header.typ}`,
         };
     }
 
