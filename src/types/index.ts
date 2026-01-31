@@ -19,16 +19,22 @@ export type {
   ValidatorConfig,
 } from "./config.ts";
 
-// Validation types
+// Error types
+export type { ValidationErrorCode, ValidationError } from "./errors.ts";
+
+// Warning types
+export type { ValidationWarningCode, ValidationWarning } from "./warnings.ts";
+
+// Result types
 export type {
-  ValidationErrorCode,
-  ValidationError,
-  ValidationWarningCode,
-  ValidationWarning,
   ValidationSuccess,
   ValidationFailure,
   ValidationResult,
+} from "./results.ts";
+
+// Helper types
+export type {
   FlagCheckResult,
   ExpirationInfo,
   DomainCheckResult,
-} from "./validation.ts";
+} from "./helpers.ts";

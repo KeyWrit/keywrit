@@ -9,12 +9,12 @@ import type {
   FlagCheckResult,
   ExpirationInfo,
   DomainCheckResult,
-} from "./types/index.ts";
-import { LicenseValidator } from "./validator.ts";
-import { LicenseValidatorBound } from "./validator-bound.ts";
-import { decodePayload } from "./jwt/decode.ts";
-import { computeExpirationInfo } from "./utils/time.ts";
-import { isDomainAllowed } from "./utils/domain.ts";
+} from "../types/index.ts";
+import { LicenseValidator } from "./base.ts";
+import { LicenseValidatorBound } from "./bound.ts";
+import { decodePayload } from "../jwt/decode.ts";
+import { computeExpirationInfo } from "../utils/time.ts";
+import { isDomainAllowed } from "../utils/domain.ts";
 
 /**
  * Unbound license validator - validates tokens on demand.

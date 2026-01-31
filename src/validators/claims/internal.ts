@@ -2,8 +2,8 @@
  * Internal claim validation for KeyWrit-specific requirements
  */
 
-import type { LicensePayload, ValidationError } from "../types/index.ts";
-import { KEYWRIT_ISSUER } from "../constants.ts";
+import type { LicensePayload, ValidationError } from "../../types/index.ts";
+import { KEYWRIT_ISSUER } from "../../constants.ts";
 
 /** Result of internal claim validation */
 export interface InternalClaimValidationResult {

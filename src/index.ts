@@ -1,8 +1,8 @@
 // Main validator classes
 // LicenseValidator is exported as the main entry point with static factory methods
-export { LicenseValidator } from "./validator.ts";
-export { LicenseValidatorUnbound } from "./validator-unbound.ts";
-export { LicenseValidatorBound } from "./validator-bound.ts";
+export { LicenseValidator } from "./validators/index.ts";
+export { LicenseValidatorUnbound } from "./validators/index.ts";
+export { LicenseValidatorBound } from "./validators/index.ts";
 
 // Constants
 export {
@@ -42,7 +42,7 @@ export type {
 export { decode, decodePayload } from "./jwt/decode.ts";
 
 // One-shot validation function
-import { LicenseValidator } from "./validator.ts";
+import { LicenseValidator } from "./validators/index.ts";
 import type { ValidatorConfig, ValidationResult } from "./types/index.ts";
 
 /**

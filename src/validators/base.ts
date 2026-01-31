@@ -9,15 +9,15 @@ import type {
   ValidationError,
   LicensePayload,
   ValidationWarning,
-} from "./types/index.ts";
-import { decodeJWT, decodePayload } from "./jwt/decode.ts";
-import { verifySignature } from "./jwt/verify.ts";
-import { validateTimingClaims, validateClaimMatchers } from "./jwt/claims.ts";
-import { validateInternalClaims } from "./jwt/internal-claims.ts";
-import { normalizePublicKey } from "./utils/keys.ts";
-import { malformedToken, invalidHeader, invalidPayload } from "./errors.ts";
-import type { LicenseValidatorUnbound } from "./validator-unbound.ts";
-import type { LicenseValidatorBound } from "./validator-bound.ts";
+} from "../types/index.ts";
+import { decodeJWT, decodePayload } from "../jwt/decode.ts";
+import { verifySignature } from "../jwt/verify.ts";
+import { validateTimingClaims, validateClaimMatchers } from "./claims/index.ts";
+import { validateInternalClaims } from "./claims/internal.ts";
+import { normalizePublicKey } from "../utils/keys.ts";
+import { malformedToken, invalidHeader, invalidPayload } from "../errors.ts";
+import type { LicenseValidatorUnbound } from "./unbound.ts";
+import type { LicenseValidatorBound } from "./bound.ts";
 
 /**
  * Abstract base class for license validation.
@@ -95,7 +95,7 @@ export abstract class LicenseValidator<T = Record<string, unknown>> {
 
     // Verify signature
     const verifyResult = await verifySignature(
-      decoded as import("./types/index.ts").DecodedJWT,
+      decoded as import("../types/index.ts").DecodedJWT,
       this.publicKey
     );
 
@@ -257,7 +257,7 @@ export abstract class LicenseValidator<T = Record<string, unknown>> {
     config: ValidatorConfig
   ): Promise<LicenseValidatorUnbound<T>> {
     // Dynamic import to avoid circular dependency
-    const { LicenseValidatorUnbound: Unbound } = await import("./validator-unbound.ts");
+    const { LicenseValidatorUnbound: Unbound } = await import("./unbound.ts");
     const publicKey = await resolvePublicKey(config);
     return new Unbound<T>(realm, publicKey, config);
   }

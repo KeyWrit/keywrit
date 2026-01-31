@@ -8,11 +8,11 @@ import type {
   ValidationError,
   LicensePayload,
   ExpirationInfo,
-} from "./types/index.ts";
-import { LicenseValidator } from "./validator.ts";
-import { LicenseValidatorUnbound } from "./validator-unbound.ts";
-import { computeExpirationInfo } from "./utils/time.ts";
-import { isDomainAllowed as checkDomainMatch } from "./utils/domain.ts";
+} from "../types";
+import { LicenseValidator } from "./base.ts";
+import { LicenseValidatorUnbound } from "./unbound.ts";
+import { computeExpirationInfo } from "../utils/time.ts";
+import { isDomainAllowed as checkDomainMatch } from "../utils/domain.ts";
 
 /**
  * Bound license validator - pre-validated token with sync access.
