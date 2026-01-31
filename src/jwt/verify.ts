@@ -3,7 +3,7 @@
  */
 
 import { verify as ed25519Verify } from "../crypto/ed25519.ts";
-import type { DecodedJWT, ValidationError } from "../types/index.ts";
+import type { DecodedJWT, ValidationError } from "../types";
 
 /** Result of signature verification */
 export type VerifyResult =

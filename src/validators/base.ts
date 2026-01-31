@@ -6,6 +6,7 @@ import { invalidHeader, invalidPayload, malformedToken } from "../errors.ts";
 import { decodeJWT, decodePayload } from "../jwt/decode.ts";
 import { verifySignature } from "../jwt/verify.ts";
 import type {
+    DecodedJWT,
     LicensePayload,
     RevocationList,
     ValidationError,
@@ -99,7 +100,7 @@ export abstract class LicenseValidator<T = Record<string, unknown>> {
 
         // Verify signature
         const verifyResult = await verifySignature(
-            decoded as import("../types/index.ts").DecodedJWT,
+            decoded as DecodedJWT,
             this.publicKey,
         );
 
